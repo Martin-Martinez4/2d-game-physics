@@ -52,16 +52,33 @@ void Graphics::RenderFrame() {
 }
 
 void Graphics::DrawLine(int x0, int y0, int x1, int y1, Uint32 color) {
-    lineColor(renderer, x0, y0, x1, y1, color);
+    // lineColor(renderer, x0, y0, x1, y1, color);
+    return;
 }
 
 void Graphics::DrawCircle(int x, int y, int radius, float angle, Uint32 color) {
-    circleColor(renderer, x, y, radius, color);
-    lineColor(renderer, x, y, x + cos(angle) * radius, y + sin(angle) * radius, color);
+    // circleColor(renderer, x, y, radius, color);
+    // lineColor(renderer, x, y, x + cos(angle) * radius, y + sin(angle) * radius, color);
+    std::vector<SDL_Point> points;
+
+    for(int w = 0; w < radius * 2; ++w){
+        for(int h = 0; h < radius * 2; ++h){
+            int dx = radius - w;
+            int dy = radius - h;
+
+            if((dx*dx + dy*dy) <= (radius*radius)){
+                SDL_Point p = {x+dx, y+dy};
+                points.push_back(p);
+            }
+        }
+    }
+    SDL_RenderDrawPoints(renderer, points.data(), points.size());
+    return;
 }
 
 void Graphics::DrawFillCircle(int x, int y, int radius, Uint32 color) {
-    filledCircleColor(renderer, x, y, radius, color);
+    // filledCircleColor(renderer, x, y, radius, color);
+    return;
 }
 
 void Graphics::DrawRect(int x, int y, int width, int height, Uint32 color) {
@@ -99,25 +116,27 @@ void Graphics::DrawFillRect(int x, int y, int width, int height, Uint32 color) {
 }
 
 void Graphics::DrawPolygon(int x, int y, const std::vector<Vec2>& vertices, Uint32 color) {
-    for (int i = 0; i < vertices.size(); i++) {
-        int currIndex = i;
-        int nextIndex = (i + 1) % vertices.size();
-        lineColor(renderer, vertices[currIndex].x, vertices[currIndex].y, vertices[nextIndex].x, vertices[nextIndex].y, color);
-    }
-    filledCircleColor(renderer, x, y, 1, color);
+    // for (int i = 0; i < vertices.size(); i++) {
+    //     int currIndex = i;
+    //     int nextIndex = (i + 1) % vertices.size();
+    //     lineColor(renderer, vertices[currIndex].x, vertices[currIndex].y, vertices[nextIndex].x, vertices[nextIndex].y, color);
+    // }
+    // filledCircleColor(renderer, x, y, 1, color);
+    return;
 }
 
 void Graphics::DrawFillPolygon(int x, int y, const std::vector<Vec2>& vertices, Uint32 color) {
-    std::vector<short> vx;
-    std::vector<short> vy;
-    for (int i = 0; i < vertices.size(); i++) {
-        vx.push_back(static_cast<int>(vertices[i].x));
-    }
-    for (int i = 0; i < vertices.size(); i++) {
-        vy.push_back(static_cast<int>(vertices[i].y));
-    }
-    filledPolygonColor(renderer, &vx[0], &vy[0], vertices.size(), color);
-    filledCircleColor(renderer, x, y, 1, 0xFF000000);
+    // std::vector<short> vx;
+    // std::vector<short> vy;
+    // for (int i = 0; i < vertices.size(); i++) {
+    //     vx.push_back(static_cast<int>(vertices[i].x));
+    // }
+    // for (int i = 0; i < vertices.size(); i++) {
+    //     vy.push_back(static_cast<int>(vertices[i].y));
+    // }
+    // filledPolygonColor(renderer, &vx[0], &vy[0], vertices.size(), color);
+    // filledCircleColor(renderer, x, y, 1, 0xFF000000);
+    return;
 }
 
 void Graphics::DrawTexture(int x, int y, int width, int height, float rotation, SDL_Texture* texture) {

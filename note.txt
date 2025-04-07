@@ -1,0 +1,2 @@
+To get it to run on Windows had to run (SDL2 source was put into a folder called SDL2 in C:/)
+- cmake -S . -B ./build -DSDL2_DIR:STRING=C:/SDL2/cmake
