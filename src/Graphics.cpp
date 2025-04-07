@@ -1,4 +1,9 @@
 #include "Graphics.h"
+#include <SDL_pixels.h>
+#include <SDL_rect.h>
+#include <SDL_render.h>
+#include <SDL_stdinc.h>
+#include <SDL_video.h>
 #include <iostream>
 #include <SDL.h>
 
@@ -60,14 +65,37 @@ void Graphics::DrawFillCircle(int x, int y, int radius, Uint32 color) {
 }
 
 void Graphics::DrawRect(int x, int y, int width, int height, Uint32 color) {
-    lineColor(renderer, x - width / 2.0, y - height / 2.0, x + width / 2.0, y - height / 2.0, color);
-    lineColor(renderer, x + width / 2.0, y - height / 2.0, x + width / 2.0, y + height / 2.0, color);
-    lineColor(renderer, x + width / 2.0, y + height / 2.0, x - width / 2.0, y + height / 2.0, color);
-    lineColor(renderer, x - width / 2.0, y + height / 2.0, x - width / 2.0, y - height / 2.0, color);
+    // lineColor(renderer, x - width / 2.0, y - height / 2.0, x + width / 2.0, y - height / 2.0, color);
+    // lineColor(renderer, x + width / 2.0, y - height / 2.0, x + width / 2.0, y + height / 2.0, color);
+    // lineColor(renderer, x + width / 2.0, y + height / 2.0, x - width / 2.0, y + height / 2.0, color);
+    // lineColor(renderer, x - width / 2.0, y + height / 2.0, x - width / 2.0, y - height / 2.0, color);
+    SDL_Rect rect;
+    rect.x = x + width/2.0f;
+    rect.y = y + height/2.0f;
+    rect.w = width;
+    rect.h = height;
+
+    Uint8 r,g,b,a;
+
+    SDL_GetRGBA(color, SDL_GetWindowSurface(window)->format, &r,&g,&b,&a);
+    SDL_SetRenderDrawColor(renderer, r, g, b, a);
+    SDL_RenderDrawRect(renderer, &rect);
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 }
 
 void Graphics::DrawFillRect(int x, int y, int width, int height, Uint32 color) {
-    boxColor(renderer, x - width / 2.0, y - height / 2.0, x + width / 2.0, y + height / 2.0, color);
+    SDL_Rect rect;
+    rect.x = x + width/2.0f;
+    rect.y = y + height/2.0f;
+    rect.w = width;
+    rect.h = height;
+
+    Uint8 r,g,b,a;
+
+    SDL_GetRGBA(color, SDL_GetWindowSurface(window)->format, &r,&g,&b,&a);
+    SDL_SetRenderDrawColor(renderer, r, g, b, a);
+    SDL_RenderFillRect(renderer, &rect);
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 }
 
 void Graphics::DrawPolygon(int x, int y, const std::vector<Vec2>& vertices, Uint32 color) {
