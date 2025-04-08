@@ -1,4 +1,6 @@
 #include "Application.h"
+#include "Graphics.h"
+#include "Vec2.h"
 #include <SDL.h>
 #include <SDL_events.h>
 #include <SDL_keycode.h>
@@ -36,7 +38,10 @@ void Application::Update(){
 
 void Application::Render(){
     Graphics::ClearScreen(0xFF056263);
-    Graphics::DrawFillCircle(200, 200, 40, 0xFFFFFFFF);
+    Graphics::DrawCircle(200, 200, 40, 10,0xFFFFFFFF);
+    // Graphics::DrawFillRect(400, 400, 100, 200, 0x99999999);
+    Graphics::DrawRect(700, 700, 100, 200, 0xFFFFFFFF);
+    Graphics::DrawPolygon(500, 500, std::vector<Vec2>{{300, 500},{440, 540},{460, 500}, {300, 500}}, 0x99999999);
     Graphics::RenderFrame();
 }
 

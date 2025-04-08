@@ -4,6 +4,7 @@
 #include <SDL_render.h>
 #include <SDL_stdinc.h>
 #include <SDL_video.h>
+#include <cstdint>
 #include <iostream>
 #include <SDL.h>
 
@@ -52,13 +53,62 @@ void Graphics::RenderFrame() {
 }
 
 void Graphics::DrawLine(int x0, int y0, int x1, int y1, Uint32 color) {
-    // lineColor(renderer, x0, y0, x1, y1, color);
+    SDL_SetRenderDrawColor(renderer,color >> 16, color >> 8, color, 255);
+    SDL_RenderDrawLine(renderer, x0, y0, x1, y1);
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
     return;
 }
 
+// https://en.wikipedia.org/w/index.php?title=Midpoint_circle_algorithm&oldid=889172082#C_example
 void Graphics::DrawCircle(int x, int y, int radius, float angle, Uint32 color) {
-    // circleColor(renderer, x, y, radius, color);
-    // lineColor(renderer, x, y, x + cos(angle) * radius, y + sin(angle) * radius, color);
+    std::vector<SDL_Point> points;
+
+    const Uint32 d = radius * 2;
+
+    int h = radius;
+    int v = 0;
+    int dx = 1; 
+    int dy = 1;
+    
+    int error = dx - (d << 1);
+
+    while(h >= v){
+        
+        
+
+        points.push_back(SDL_Point{x+h, y-v});
+        points.push_back(SDL_Point{x+h, y+v});
+        points.push_back(SDL_Point{x-h, y-v});
+        points.push_back(SDL_Point{x-h, y+v});
+
+        points.push_back(SDL_Point{x+v, y-h});
+        points.push_back(SDL_Point{x+v, y+h});
+        points.push_back(SDL_Point{x-v, y-h});
+        points.push_back(SDL_Point{x-v, y+h});
+
+        if (error <= 0){
+         ++v;
+         error += dy;
+         dy += 2;
+      }
+
+      if (error > 0){
+         --h;
+         dx += 2;
+         error += (dx - d);
+      }
+    }
+		
+    SDL_SetRenderDrawColor(renderer,color >> 16, color >> 8, color, 255);
+    SDL_RenderDrawPoints(renderer, points.data(), points.size());
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
+    DrawLine(x,y,x+cos(angle) * radius, x+sin(angle) * radius, color);
+    return;
+}
+
+void Graphics::DrawFillCircle(int x, int y, int radius, Uint32 color) {
     std::vector<SDL_Point> points;
 
     for(int w = 0; w < radius * 2; ++w){
@@ -72,30 +122,22 @@ void Graphics::DrawCircle(int x, int y, int radius, float angle, Uint32 color) {
             }
         }
     }
+		
+    SDL_SetRenderDrawColor(renderer,color >> 16, color >> 8, color, 255);
     SDL_RenderDrawPoints(renderer, points.data(), points.size());
-    return;
-}
-
-void Graphics::DrawFillCircle(int x, int y, int radius, Uint32 color) {
-    // filledCircleColor(renderer, x, y, radius, color);
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     return;
 }
 
 void Graphics::DrawRect(int x, int y, int width, int height, Uint32 color) {
-    // lineColor(renderer, x - width / 2.0, y - height / 2.0, x + width / 2.0, y - height / 2.0, color);
-    // lineColor(renderer, x + width / 2.0, y - height / 2.0, x + width / 2.0, y + height / 2.0, color);
-    // lineColor(renderer, x + width / 2.0, y + height / 2.0, x - width / 2.0, y + height / 2.0, color);
-    // lineColor(renderer, x - width / 2.0, y + height / 2.0, x - width / 2.0, y - height / 2.0, color);
+   
     SDL_Rect rect;
     rect.x = x + width/2.0f;
     rect.y = y + height/2.0f;
     rect.w = width;
     rect.h = height;
 
-    Uint8 r,g,b,a;
-
-    SDL_GetRGBA(color, SDL_GetWindowSurface(window)->format, &r,&g,&b,&a);
-    SDL_SetRenderDrawColor(renderer, r, g, b, a);
+    SDL_SetRenderDrawColor(renderer,color >> 16, color >> 8, color, 255);
     SDL_RenderDrawRect(renderer, &rect);
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 }
@@ -107,21 +149,22 @@ void Graphics::DrawFillRect(int x, int y, int width, int height, Uint32 color) {
     rect.w = width;
     rect.h = height;
 
-    Uint8 r,g,b,a;
-
-    SDL_GetRGBA(color, SDL_GetWindowSurface(window)->format, &r,&g,&b,&a);
-    SDL_SetRenderDrawColor(renderer, r, g, b, a);
+    SDL_SetRenderDrawColor(renderer,color >> 16, color >> 8, color, 255);
     SDL_RenderFillRect(renderer, &rect);
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 }
 
 void Graphics::DrawPolygon(int x, int y, const std::vector<Vec2>& vertices, Uint32 color) {
-    // for (int i = 0; i < vertices.size(); i++) {
-    //     int currIndex = i;
-    //     int nextIndex = (i + 1) % vertices.size();
-    //     lineColor(renderer, vertices[currIndex].x, vertices[currIndex].y, vertices[nextIndex].x, vertices[nextIndex].y, color);
-    // }
-    // filledCircleColor(renderer, x, y, 1, color);
+    std::vector<SDL_Point> points;
+
+    for (int i = 0; i < vertices.size(); i++) {
+        points.push_back(SDL_Point{static_cast<int>(vertices[i].x), static_cast<int>(vertices[i].y)});
+    }
+
+    SDL_SetRenderDrawColor(renderer,color >> 16, color >> 8, color, 255);
+    SDL_RenderDrawLines(renderer, points.data(), vertices.size());
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
     return;
 }
 
