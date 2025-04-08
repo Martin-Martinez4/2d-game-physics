@@ -13,6 +13,7 @@ void Application::Setup(){
     running = Graphics::OpenWindow();
 
     // setup objects in the scene
+    particle = new Particle(50, 100, 1.0);
 }
 
 void Application::Input(){
@@ -33,15 +34,17 @@ void Application::Input(){
 }
 
 void Application::Update(){
-    return;
+    particle->velocity = Vec2(2.0, 0.0);
+
+    particle->position += particle->velocity;
 }
 
 void Application::Render(){
     Graphics::ClearScreen(0xFF056263);
-    Graphics::DrawCircle(200, 200, 40, 10,0xFFFFFFFF);
+    Graphics::DrawFillCircle(particle->position.x, particle->position.y, particle->mass * 4, 0xFFFFFFFF);
     // Graphics::DrawFillRect(400, 400, 100, 200, 0x99999999);
-    Graphics::DrawRect(700, 700, 100, 200, 0xFFFFFFFF);
-    Graphics::DrawPolygon(500, 500, std::vector<Vec2>{{300, 500},{440, 540},{460, 500}, {300, 500}}, 0x99999999);
+    // Graphics::DrawRect(700, 700, 100, 200, 0xFFFFFFFF);
+    // Graphics::DrawPolygon(500, 500, std::vector<Vec2>{{300, 500},{440, 540},{460, 500}, {300, 500}}, 0x99999999);
     Graphics::RenderFrame();
 }
 

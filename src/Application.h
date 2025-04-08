@@ -1,11 +1,12 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
-#include "Graphics.h"
+#include "Particle.h"
 
 class Application {
-    private: 
+    private:
         bool running = false;
+        Particle* particle;
     
         public:
             Application() = default;
@@ -17,6 +18,7 @@ class Application {
             void Update();
             void Render();
             void Destroy();
+
 };
 
 #endif
