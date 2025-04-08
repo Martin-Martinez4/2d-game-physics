@@ -2,9 +2,11 @@
 #include "Graphics.h"
 #include "Vec2.h"
 #include "Constants.h"
+#include "Force.h"
 #include <SDL.h>
 #include <SDL_events.h>
 #include <SDL_keycode.h>
+#include <iostream>
 
 bool Application::IsRunning(){
     return running;
@@ -20,6 +22,11 @@ void Application::Setup(){
     Particle* bigBall = new Particle(200, 100, 3.0);
     bigBall->radius = 12;
     particles.push_back(bigBall);
+
+    liquid.x = 0;
+    liquid.y = Graphics::Height() /2;
+    liquid.w = Graphics::Width();
+    liquid.h = Graphics::Height() /2;
 
 }
 
@@ -62,6 +69,16 @@ void Application::Input(){
                     pushForce.x =0;
                 }
                 break;
+            case SDL_MOUSEBUTTONDOWN:
+                if(event.button.button == SDL_BUTTON_LEFT){
+
+                    int x,y;
+                    SDL_GetMouseState(&x, &y);
+                    Particle* particle = new Particle(x, y, 1.0);
+                    particle->radius = 5;
+                    particles.push_back(particle);
+                }
+                break;
         }
     }
 }
@@ -90,6 +107,11 @@ void Application::Update(){
         particle->AddForce(pushForce);
         particle->Integrate(deltaTime);
 
+        if(particle->position.y >= liquid.y){
+            Vec2 drag = GenerateDragForce(*particle, 0.05, deltaTime);
+            particle->AddForce(drag);
+        }
+
          if (particle->position.x - particle->radius <= 0) {
             particle->position.x = particle->radius;
             particle->velocity.x *= -0.9;
@@ -113,10 +135,14 @@ void Application::Update(){
 void Application::Render(){
     Graphics::ClearScreen(0xFF056263);
 
+    Graphics::DrawFillRect(liquid.x, liquid.y, liquid.w, liquid.h,  0xFF13376E);
+    // Graphics::DrawFillRect(0, 0, 100, 50,  0xFF13376E);
+
     for(auto particle: particles){
 
         Graphics::DrawFillCircle(particle->position.x, particle->position.y, particle->radius, 0xFFFFFFFF);
     }
+
     // Graphics::DrawFillRect(400, 400, 100, 200, 0x99999999);
     // Graphics::DrawRect(700, 700, 100, 200, 0xFFFFFFFF);
     // Graphics::DrawPolygon(500, 500, std::vector<Vec2>{{300, 500},{440, 540},{460, 500}, {300, 500}}, 0x99999999);

@@ -8,10 +8,11 @@
 #include <iostream>
 #include <SDL.h>
 
+
 SDL_Window* Graphics::window = NULL;
 SDL_Renderer* Graphics::renderer = NULL;
-int Graphics::windowWidth = 0;
-int Graphics::windowHeight = 0;
+int Graphics::windowWidth = 10;
+int Graphics::windowHeight = 10;
 
 int Graphics::Width() {
     return windowWidth;
@@ -26,6 +27,7 @@ bool Graphics::OpenWindow() {
         std::cerr << "Error initializing SDL" << std::endl;
         return false;
     }
+    std::cout << "test \n";
     SDL_DisplayMode display_mode;
     SDL_GetCurrentDisplayMode(0, &display_mode);
     windowWidth = display_mode.w;
@@ -144,8 +146,15 @@ void Graphics::DrawRect(int x, int y, int width, int height, Uint32 color) {
 
 void Graphics::DrawFillRect(int x, int y, int width, int height, Uint32 color) {
     SDL_Rect rect;
-    rect.x = x + width/2.0f;
-    rect.y = y + height/2.0f;
+
+    // if input rect has origin in center
+    // rect.x = x - width/2;
+    // rect.y = y - height/2;
+    // rect.w = width;
+    // rect.h = height;
+
+    rect.x = x;
+    rect.y = y;
     rect.w = width;
     rect.h = height;
 
