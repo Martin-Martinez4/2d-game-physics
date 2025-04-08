@@ -2,11 +2,14 @@
 #define APPLICATION_H
 
 #include "Particle.h"
+#include <vector>
 
 class Application {
     private:
         bool running = false;
-        Particle* particle;
+        std::vector<Particle*> particles;
+
+        Vec2 pushForce = {0.0f, 0.0f};
     
         public:
             Application() = default;
