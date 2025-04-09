@@ -2,6 +2,7 @@
 #define APPLICATION_H
 
 #include "Particle.h"
+#include "Body.h"
 #include <vector>
 #include <SDL_rect.h>
 
@@ -10,6 +11,7 @@ class Application {
     private:
         bool running = false;
         std::vector<Particle*> particles;
+        std::vector<Body*> bodies;
 
         Vec2 pushForce = {0.0f, 0.0f};
         SDL_Rect liquid;

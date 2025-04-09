@@ -13,6 +13,7 @@ set(sources ${sources}
 ${CMAKE_CURRENT_SOURCE_DIR}/src/Physics/Particle.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/Physics/Vec2.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/Physics/Force.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/src/Physics/Body.cpp
  
 )
 

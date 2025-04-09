@@ -2,6 +2,7 @@
 #include "Graphics.h"
 #include "Vec2.h"
 #include "Constants.h"
+#include "Body.h"
 #include "Force.h"
 #include <SDL.h>
 #include <SDL_events.h>
@@ -22,6 +23,9 @@ void Application::Setup(){
     Particle* bigBall = new Particle(200, 100, 3.0);
     bigBall->radius = 12;
     particles.push_back(bigBall);
+
+    Body* c1 = new Body(CircleShape(50), Graphics::Width() / 2.0, Graphics::Height() / 2.0, 1.0);
+    bodies.push_back(c1);
 
     liquid.x = 0;
     liquid.y = Graphics::Height() /2;
@@ -128,6 +132,46 @@ void Application::Update(){
         }
     }
 
+    for(auto body: bodies){
+        body->AddForce(wind);
+        body->AddForce(weight * body->mass);
+        body->AddForce(pushForce);
+
+        float torque = 20;
+        body->AddTorque(torque);
+
+        body->Integrate(deltaTime);
+        body->IntegrateAngular(deltaTime);
+
+        if(body->position.y >= liquid.y){
+            Vec2 drag = GenerateDragForce(*body, 0.05, deltaTime);
+            body->AddForce(drag);
+        }
+
+        switch(body->shape->GetType()){
+            case ShapeType::CIRCLE:
+            {
+                CircleShape* cs = (CircleShape*) body->shape;
+                if (body->position.x - cs->radius <= 0) {
+                    body->position.x = cs->radius;
+                    body->velocity.x *= -0.9;
+                } else if (body->position.x + cs->radius >= Graphics::Width()) {
+                    body->position.x = Graphics::Width() - cs->radius;
+                    body->velocity.x *= -0.9;
+                }
+                if (body->position.y - cs->radius <= 0) {
+                    body->position.y = cs->radius;
+                    body->velocity.y *= -0.9;
+                } else if (body->position.y + cs->radius >= Graphics::Height()) {
+                    body->position.y = Graphics::Height() - cs->radius;
+                    body->velocity.y *= -0.9;
+                }
+                break;
+            }
+            default:
+                break;
+        }
+    }
 
     
 }
@@ -143,9 +187,18 @@ void Application::Render(){
         Graphics::DrawFillCircle(particle->position.x, particle->position.y, particle->radius, 0xFFFFFFFF);
     }
 
-    // Graphics::DrawFillRect(400, 400, 100, 200, 0x99999999);
-    // Graphics::DrawRect(700, 700, 100, 200, 0xFFFFFFFF);
-    // Graphics::DrawPolygon(500, 500, std::vector<Vec2>{{300, 500},{440, 540},{460, 500}, {300, 500}}, 0x99999999);
+    for(auto body: bodies){
+        switch(body->shape->GetType()){
+            case ShapeType::CIRCLE:
+            {
+                CircleShape* cs = (CircleShape*) body->shape;
+                Graphics::DrawCircle(body->position.x, body->position.y, cs->radius, body->rotation, 0xFFFFFFFF);
+                break;
+            }
+            default:
+                break;
+        }
+    }
     Graphics::RenderFrame();
 }
 

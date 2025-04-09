@@ -106,7 +106,7 @@ void Graphics::DrawCircle(int x, int y, int radius, float angle, Uint32 color) {
     SDL_RenderDrawPoints(renderer, points.data(), points.size());
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
-    DrawLine(x,y,x+cos(angle) * radius, x+sin(angle) * radius, color);
+    DrawLine(x,y,x+cos(angle) * radius, y+sin(angle) * radius, color);
     return;
 }
 
