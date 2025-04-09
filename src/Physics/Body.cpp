@@ -28,8 +28,24 @@ Shape* PolygonShape::Clone() const{
   return new PolygonShape(vertices);
 }
 
+void PolygonShape::UpdateVertices(float angle, const Vec2& position){
+  for(int i = 0; i < vertices.size(); ++i){
+    worldVertices[i] = vertices[i].Rotate(angle);
+    worldVertices[i] += position;
+  }
+}
+
 BoxShape:: BoxShape(float width, float height):width{width}, height{height}{
-  // TODO:
+
+  vertices.push_back(Vec2(-width / 2.0f, -height / 2.0f));
+  vertices.push_back(Vec2(width / 2.0f, -height / 2.0f));
+  vertices.push_back(Vec2(width / 2.0f, height / 2.0f));
+  vertices.push_back(Vec2(-width / 2.0f, height / 2.0f));
+
+  worldVertices.push_back(Vec2(-width / 2.0f, -height / 2.0f));
+  worldVertices.push_back(Vec2(width / 2.0f, -height / 2.0f));
+  worldVertices.push_back(Vec2(width / 2.0f, height / 2.0f));
+  worldVertices.push_back(Vec2(-width / 2.0f, height / 2.0f));
 }
 BoxShape::~BoxShape(){
   // TODO

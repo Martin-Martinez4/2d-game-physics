@@ -25,7 +25,10 @@ void Application::Setup(){
     particles.push_back(bigBall);
 
     Body* c1 = new Body(CircleShape(50), Graphics::Width() / 2.0, Graphics::Height() / 2.0, 1.0);
-    bodies.push_back(c1);
+    Body* b1 = new Body(BoxShape(200, 100), Graphics::Width() / 2.0, Graphics::Height() / 2.0, 1.0);
+
+    // bodies.push_back(c1);
+    bodies.push_back(b1);
 
     liquid.x = 0;
     liquid.y = Graphics::Height() /2;
@@ -168,6 +171,13 @@ void Application::Update(){
                 }
                 break;
             }
+            case ShapeType::POLYGON:
+            case ShapeType::BOX:
+            {
+                PolygonShape* ps = (PolygonShape*) body->shape;
+                ps->UpdateVertices(body->rotation, body->position);
+                break;
+            }
             default:
                 break;
         }
@@ -194,6 +204,11 @@ void Application::Render(){
                 CircleShape* cs = (CircleShape*) body->shape;
                 Graphics::DrawCircle(body->position.x, body->position.y, cs->radius, body->rotation, 0xFFFFFFFF);
                 break;
+            }
+            case ShapeType::BOX: 
+            {
+                BoxShape* bs = (BoxShape*) body->shape;
+                Graphics::DrawPolygon(body->position.x, body->position.y, bs->worldVertices, 0xFFFFFFFF);
             }
             default:
                 break;

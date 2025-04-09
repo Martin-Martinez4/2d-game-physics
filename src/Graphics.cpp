@@ -170,8 +170,11 @@ void Graphics::DrawPolygon(int x, int y, const std::vector<Vec2>& vertices, Uint
         points.push_back(SDL_Point{static_cast<int>(vertices[i].x), static_cast<int>(vertices[i].y)});
     }
 
+    points.push_back(SDL_Point{static_cast<int>(vertices[0].x), static_cast<int>(vertices[0].y)});
+
     SDL_SetRenderDrawColor(renderer,color >> 16, color >> 8, color, 255);
-    SDL_RenderDrawLines(renderer, points.data(), vertices.size());
+    SDL_RenderDrawLines(renderer, points.data(), vertices.size()+1);
+    SDL_RenderDrawPoint(renderer, x, y);
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
     return;
