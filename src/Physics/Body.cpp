@@ -30,6 +30,12 @@ Shape* PolygonShape::Clone() const{
   return new PolygonShape(vertices);
 }
 
+Vec2 PolygonShape::EdgeAt(int index) const {
+  int currVertex = index;
+  int nextVertex = (index + 1) % worldVertices.size();
+  return worldVertices[nextVertex] - worldVertices[currVertex];
+}
+
 void PolygonShape::UpdateVertices(float angle, const Vec2& position){
   for(int i = 0; i < vertices.size(); ++i){
     worldVertices[i] = vertices[i].Rotate(angle);
@@ -110,19 +116,23 @@ void Body::ClearTorque(){
   sumTorque = 0.0;
 }
 
+void Body::ApplyImpulse(const Vec2& j){
+  if(IsStatic()){
+    return;
+  }
+
+  velocity += j * invMass;
+}
+
 void Body::Integrate(float dt) {
 
   if(IsStatic()){
     return;
   }
 
-  // Find the acceleration based on the forces that are being applied and the mass
   acceleration = sumForces * invMass;
-
-  // Integrate the acceleration to find the new velocity
   velocity += acceleration * dt;
 
-  // Integrate the velocity to find the acceleration
   position += velocity * dt;
 
   ClearForces();

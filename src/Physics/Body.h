@@ -34,6 +34,7 @@ struct PolygonShape: public Shape {
   virtual ~PolygonShape();
   ShapeType GetType() const override;
   float GetMomentOfInertia() const override;
+  Vec2 PolygonShape::EdgeAt(int index) const;
   Shape* Clone() const override;
 
   void UpdateVertices(float angle, const Vec2& position);
@@ -69,6 +70,8 @@ struct Body {
 
     bool isColliding;
 
+    float restitution = 0.0f;
+
     Shape* shape = nullptr;
 
     Body(const Shape& shape, float x, float y, float mass);
@@ -81,6 +84,8 @@ struct Body {
 
     void AddTorque(float torque);
     void ClearTorque();
+
+    void ApplyImpulse(const Vec2& j);
 
     void Integrate(float dt);
     void IntegrateAngular(float dt);

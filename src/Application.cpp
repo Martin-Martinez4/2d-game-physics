@@ -4,7 +4,7 @@
 #include "Constants.h"
 #include "Body.h"
 #include "Force.h"
-#include "CollisionDetection.h"
+#include "Collision.h"
 #include <SDL.h>
 #include <SDL_events.h>
 #include <SDL_keycode.h>
@@ -25,16 +25,22 @@ void Application::Setup(){
     bigBall->radius = 12;
     particles.push_back(bigBall);
 
-    Body* c1 = new Body(CircleShape(50), Graphics::Width() / 2.0, Graphics::Height() / 2.0, 0.0);
+    // Body* c1 = new Body(CircleShape(50), Graphics::Width() / 2.0, Graphics::Height() / 2.0, 0.0);
+    // c1->restitution = 0.0;
+    // bodies.push_back(c1);
+
     Body* b1 = new Body(BoxShape(200, 100), Graphics::Width() / 2.0, Graphics::Height() / 2.0, 1.0);
+    Body* b2 = new Body(BoxShape(200, 100), Graphics::Width() / 2.0, Graphics::Height() / 2.0, 1.0);
+    b1->angularVelocity = 0.4;
+    b2->angularVelocity = 0.1;
 
-    bodies.push_back(c1);
     bodies.push_back(b1);
+    bodies.push_back(b2);
 
-    liquid.x = 0;
-    liquid.y = Graphics::Height() /2;
-    liquid.w = Graphics::Width();
-    liquid.h = Graphics::Height() /2;
+    // liquid.x = 0;
+    // liquid.y = Graphics::Height() /2;
+    // liquid.w = Graphics::Width();
+    // liquid.h = Graphics::Height() /2;
 
 }
 
@@ -82,10 +88,21 @@ void Application::Input(){
 
                     int x,y;
                     SDL_GetMouseState(&x, &y);
-                    Particle* particle = new Particle(x, y, 1.0);
-                    particle->radius = 5;
-                    particles.push_back(particle);
+                    // Particle* particle = new Particle(x, y, 1.0);
+                    // particle->radius = 5;
+                    // particles.push_back(particle);
+                    
+                    Body* smallBall = new Body(CircleShape(40), x, y, 1.0);
+                    smallBall->restitution = 0.9;
+                    bodies.push_back(smallBall);
+
                 }
+                break;
+            case SDL_MOUSEMOTION:
+                int x, y;
+                SDL_GetMouseState(&x, &y);
+                bodies[0]->position.x = x;
+                bodies[0]->position.y = y;
                 break;
         }
     }
@@ -137,17 +154,17 @@ void Application::Update(){
     }
 
     for(auto body: bodies){
-        body->AddForce(wind);
-        body->AddForce(weight * body->mass);
+        // body->AddForce(wind);
+        // body->AddForce(weight * body->mass);
         body->AddForce(pushForce);
 
-        float torque = 20;
-        body->AddTorque(torque);
+        // float torque = 20;
+        // body->AddTorque(torque);
 
-        if(body->position.y >= liquid.y){
-            Vec2 drag = GenerateDragForce(*body, 0.05, deltaTime);
-            body->AddForce(drag);
-        }
+        // if(body->position.y >= liquid.y){
+        //     Vec2 drag = GenerateDragForce(*body, 0.05, deltaTime);
+        //     body->AddForce(drag);
+        // }
 
         body->Update(deltaTime);
 
@@ -159,8 +176,11 @@ void Application::Update(){
                 a->isColliding = false;
                 b->isColliding = false;
 
-                CollisionDetection::Contact contact;
-                if(CollisionDetection::IsColliding(a, b, contact)){
+                Collision::Contact contact;
+                if(Collision::IsColliding(a, b, contact)){
+
+                    // contact.ResolveCollision();
+
                     Graphics::DrawFillCircle(contact.start.x, contact.start.y, 3, 0xFFFF00FF);
                     Graphics::DrawFillCircle(contact.end.x, contact.end.y, 3, 0xFFFF00FF);
                     Graphics::DrawLine(contact.start.x, contact.start.y, contact.start.x + contact.normal.x * 15, contact.start.y + contact.normal.y * 15, 0xFFFF00FF);
@@ -199,7 +219,7 @@ void Application::Update(){
 void Application::Render(){
     Graphics::ClearScreen(0xFF056263);
 
-    Graphics::DrawFillRect(liquid.x, liquid.y, liquid.w, liquid.h,  0xFF13376E);
+    // Graphics::DrawFillRect(liquid.x, liquid.y, liquid.w, liquid.h,  0xFF13376E);
     // Graphics::DrawFillRect(0, 0, 100, 50,  0xFF13376E);
 
     for(auto particle: particles){
@@ -208,17 +228,19 @@ void Application::Render(){
     }
 
     for(auto body: bodies){
+        Uint32 color = body->isColliding ? 0x991125 : 0xFFFFFFFF;
         switch(body->shape->GetType()){
             case ShapeType::CIRCLE:
             {
                 CircleShape* cs = (CircleShape*) body->shape;
-                Graphics::DrawCircle(body->position.x, body->position.y, cs->radius, body->rotation, 0xFFFFFFFF);
+                // Graphics::DrawCircle(body->position.x, body->position.y, cs->radius, body->rotation, 0xFFFFFFFF);
+                Graphics::DrawFillCircle(body->position.x, body->position.y, cs->radius, color);
                 break;
             }
             case ShapeType::BOX: 
             {
                 BoxShape* bs = (BoxShape*) body->shape;
-                Graphics::DrawPolygon(body->position.x, body->position.y, bs->worldVertices, 0xFFFFFFFF);
+                Graphics::DrawPolygon(body->position.x, body->position.y, bs->worldVertices, color);
             }
             default:
                 break;
