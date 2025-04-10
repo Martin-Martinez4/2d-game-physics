@@ -67,6 +67,8 @@ struct Body {
 
     float sumTorque;
 
+    bool isColliding;
+
     Shape* shape = nullptr;
 
     Body(const Shape& shape, float x, float y, float mass);
@@ -80,6 +82,8 @@ struct Body {
 
     void Integrate(float dt);
     void IntegrateAngular(float dt);
+
+    void Update(float dt);
 };
 
 #endif

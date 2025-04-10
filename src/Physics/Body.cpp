@@ -1,4 +1,5 @@
 #include "Body.h"
+#include "Graphics.h"
 
 CircleShape::CircleShape(float radius): radius{radius}{};
 CircleShape::~CircleShape(){};
@@ -124,6 +125,24 @@ void Body::IntegrateAngular(float dt){
     rotation += angularVelocity * dt;
 
     ClearTorque();
+}
+
+void Body::Update(float dt){
+  Integrate(dt);
+  IntegrateAngular(dt);
+
+  switch(shape->GetType()){
+    
+    case ShapeType::POLYGON:
+    case ShapeType::BOX:
+    {
+        PolygonShape* ps = (PolygonShape*) shape;
+        ps->UpdateVertices(rotation, position);
+        break;
+    }
+    default:
+        break;
+}
 }
 
 

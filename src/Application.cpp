@@ -4,6 +4,7 @@
 #include "Constants.h"
 #include "Body.h"
 #include "Force.h"
+#include "CollisionDetection.h"
 #include <SDL.h>
 #include <SDL_events.h>
 #include <SDL_keycode.h>
@@ -143,44 +144,53 @@ void Application::Update(){
         float torque = 20;
         body->AddTorque(torque);
 
-        body->Integrate(deltaTime);
-        body->IntegrateAngular(deltaTime);
-
         if(body->position.y >= liquid.y){
             Vec2 drag = GenerateDragForce(*body, 0.05, deltaTime);
             body->AddForce(drag);
         }
 
-        switch(body->shape->GetType()){
-            case ShapeType::CIRCLE:
-            {
-                CircleShape* cs = (CircleShape*) body->shape;
-                if (body->position.x - cs->radius <= 0) {
-                    body->position.x = cs->radius;
-                    body->velocity.x *= -0.9;
-                } else if (body->position.x + cs->radius >= Graphics::Width()) {
-                    body->position.x = Graphics::Width() - cs->radius;
-                    body->velocity.x *= -0.9;
+        body->Update(deltaTime);
+
+        for(int i = 0; i <= bodies.size() - 1; ++i){
+            for(int j = i; j < bodies.size(); ++j){
+                Body* a = bodies[i];
+                Body* b = bodies[j];
+
+                a->isColliding = false;
+                b->isColliding = false;
+
+                CollisionDetection::Contact contact;
+                if(CollisionDetection::IsColliding(a, b, contact)){
+                    Graphics::DrawFillCircle(contact.start.x, contact.start.y, 3, 0xFFFF00FF);
+                    Graphics::DrawFillCircle(contact.end.x, contact.end.y, 3, 0xFFFF00FF);
+                    Graphics::DrawLine(contact.start.x, contact.start.y, contact.start.x + contact.normal.x * 15, contact.start.y + contact.normal.y * 15, 0xFFFF00FF);
+                    a->isColliding = true;
+                    b->isColliding = true;
+
                 }
-                if (body->position.y - cs->radius <= 0) {
-                    body->position.y = cs->radius;
-                    body->velocity.y *= -0.9;
-                } else if (body->position.y + cs->radius >= Graphics::Height()) {
-                    body->position.y = Graphics::Height() - cs->radius;
-                    body->velocity.y *= -0.9;
-                }
-                break;
             }
-            case ShapeType::POLYGON:
-            case ShapeType::BOX:
-            {
-                PolygonShape* ps = (PolygonShape*) body->shape;
-                ps->UpdateVertices(body->rotation, body->position);
-                break;
-            }
-            default:
-                break;
         }
+
+        if(body->shape->GetType() == ShapeType::CIRCLE){
+
+            CircleShape* cs = (CircleShape*) body->shape;
+            if (body->position.x - cs->radius <= 0) {
+                body->position.x = cs->radius;
+                body->velocity.x *= -0.9;
+            } else if (body->position.x + cs->radius >= Graphics::Width()) {
+                body->position.x = Graphics::Width() - cs->radius;
+                body->velocity.x *= -0.9;
+            }
+            if (body->position.y - cs->radius <= 0) {
+                body->position.y = cs->radius;
+                body->velocity.y *= -0.9;
+            } else if (body->position.y + cs->radius >= Graphics::Height()) {
+                body->position.y = Graphics::Height() - cs->radius;
+                body->velocity.y *= -0.9;
+            }
+        }
+
+       
     }
 
     
