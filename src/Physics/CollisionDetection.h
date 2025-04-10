@@ -15,10 +15,14 @@ namespace CollisionDetection {
 
         Vec2 normal;
         float depth;
+
+
+        void ResolvePenetration();
     };
 
     bool IsColliding(Body* a, Body* b, Contact& contact);
     bool IsCollidingCircleCircle(Body* a, Body* b, Contact& contact);
+
 
 }
 

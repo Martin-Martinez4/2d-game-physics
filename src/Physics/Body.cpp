@@ -1,5 +1,6 @@
 #include "Body.h"
 #include "Graphics.h"
+#include <cmath>
 
 CircleShape::CircleShape(float radius): radius{radius}{};
 CircleShape::~CircleShape(){};
@@ -89,6 +90,11 @@ Body::~Body() {
     delete shape;
 }
 
+bool Body::IsStatic() const {
+  const float epsilon = 0.005f;
+  return fabs(invMass - 0.0f) < epsilon;
+}
+
 void Body::AddForce(const Vec2& force) {
     sumForces += force;
 }
@@ -105,26 +111,35 @@ void Body::ClearTorque(){
 }
 
 void Body::Integrate(float dt) {
-    // Find the acceleration based on the forces that are being applied and the mass
-    acceleration = sumForces * invMass;
 
-    // Integrate the acceleration to find the new velocity
-    velocity += acceleration * dt;
+  if(IsStatic()){
+    return;
+  }
 
-    // Integrate the velocity to find the acceleration
-    position += velocity * dt;
+  // Find the acceleration based on the forces that are being applied and the mass
+  acceleration = sumForces * invMass;
 
-    ClearForces();
+  // Integrate the acceleration to find the new velocity
+  velocity += acceleration * dt;
+
+  // Integrate the velocity to find the acceleration
+  position += velocity * dt;
+
+  ClearForces();
 }
 
 void Body::IntegrateAngular(float dt){
-    angularAcceleration = sumTorque * invI;
+  if(IsStatic()){
+    return;
+  }
 
-    angularVelocity += angularAcceleration * dt;
+  angularAcceleration = sumTorque * invI;
 
-    rotation += angularVelocity * dt;
+  angularVelocity += angularAcceleration * dt;
 
-    ClearTorque();
+  rotation += angularVelocity * dt;
+
+  ClearTorque();
 }
 
 void Body::Update(float dt){

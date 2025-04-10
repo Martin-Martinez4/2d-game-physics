@@ -25,10 +25,10 @@ void Application::Setup(){
     bigBall->radius = 12;
     particles.push_back(bigBall);
 
-    Body* c1 = new Body(CircleShape(50), Graphics::Width() / 2.0, Graphics::Height() / 2.0, 1.0);
+    Body* c1 = new Body(CircleShape(50), Graphics::Width() / 2.0, Graphics::Height() / 2.0, 0.0);
     Body* b1 = new Body(BoxShape(200, 100), Graphics::Width() / 2.0, Graphics::Height() / 2.0, 1.0);
 
-    // bodies.push_back(c1);
+    bodies.push_back(c1);
     bodies.push_back(b1);
 
     liquid.x = 0;
