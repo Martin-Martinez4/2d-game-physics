@@ -17,20 +17,20 @@ bool Application::IsRunning(){
 void Application::Setup(){
     running = Graphics::OpenWindow();
 
-    Particle* smallBall = new Particle(50, 100, 1.0f);
-    smallBall->radius = 4;
-    particles.push_back(smallBall);
+    // Particle* smallBall = new Particle(50, 100, 1.0f);
+    // smallBall->radius = 4;
+    // particles.push_back(smallBall);
 
-    Particle* bigBall = new Particle(200, 100, 3.0);
-    bigBall->radius = 12;
-    particles.push_back(bigBall);
+    // Particle* bigBall = new Particle(200, 100, 3.0);
+    // bigBall->radius = 12;
+    // particles.push_back(bigBall);
 
     // Body* c1 = new Body(CircleShape(50), Graphics::Width() / 2.0, Graphics::Height() / 2.0, 0.0);
     // c1->restitution = 0.0;
     // bodies.push_back(c1);
 
-    Body* b1 = new Body(BoxShape(200, 100), Graphics::Width() / 2.0, Graphics::Height() / 2.0, 1.0);
-    Body* b2 = new Body(BoxShape(200, 100), Graphics::Width() / 2.0, Graphics::Height() / 2.0, 1.0);
+    Body* b1 = new Body(BoxShape(200, 100), Graphics::Width() / 2.0, Graphics::Height() / 2.0, 0.0);
+    Body* b2 = new Body(BoxShape(Graphics::Width()/2, 100), Graphics::Width()/2, Graphics::Height() +2, 0.0f);
     b1->angularVelocity = 0.4;
     b2->angularVelocity = 0.1;
 
@@ -84,7 +84,6 @@ void Application::Input(){
                 }
                 break;
             case SDL_MOUSEBUTTONDOWN:
-                if(event.button.button == SDL_BUTTON_LEFT){
 
                     int x,y;
                     SDL_GetMouseState(&x, &y);
@@ -92,18 +91,21 @@ void Application::Input(){
                     // particle->radius = 5;
                     // particles.push_back(particle);
                     
-                    Body* smallBall = new Body(CircleShape(40), x, y, 1.0);
-                    smallBall->restitution = 0.9;
-                    bodies.push_back(smallBall);
+                //    Body* smallBall = new Body(CircleShape(40), x, y, 1.0);
+                //     smallBall->restitution = 0.9;
+                //     bodies.push_back(smallBall);
 
-                }
+                    Body* box = new Body(BoxShape(50, 50), x, y, 1.0);
+                    // box->restitution = 0.9;
+                    bodies.push_back(box);
+
                 break;
-            case SDL_MOUSEMOTION:
-                int x, y;
-                SDL_GetMouseState(&x, &y);
-                bodies[0]->position.x = x;
-                bodies[0]->position.y = y;
-                break;
+            // case SDL_MOUSEMOTION:
+            //     int x, y;
+            //     SDL_GetMouseState(&x, &y);
+            //     bodies[0]->position.x = x;
+            //     bodies[0]->position.y = y;
+            //     break;
         }
     }
 }
@@ -155,7 +157,7 @@ void Application::Update(){
 
     for(auto body: bodies){
         // body->AddForce(wind);
-        // body->AddForce(weight * body->mass);
+        body->AddForce(weight * body->mass);
         body->AddForce(pushForce);
 
         // float torque = 20;
@@ -168,28 +170,7 @@ void Application::Update(){
 
         body->Update(deltaTime);
 
-        for(int i = 0; i <= bodies.size() - 1; ++i){
-            for(int j = i; j < bodies.size(); ++j){
-                Body* a = bodies[i];
-                Body* b = bodies[j];
-
-                a->isColliding = false;
-                b->isColliding = false;
-
-                Collision::Contact contact;
-                if(Collision::IsColliding(a, b, contact)){
-
-                    // contact.ResolveCollision();
-
-                    Graphics::DrawFillCircle(contact.start.x, contact.start.y, 3, 0xFFFF00FF);
-                    Graphics::DrawFillCircle(contact.end.x, contact.end.y, 3, 0xFFFF00FF);
-                    Graphics::DrawLine(contact.start.x, contact.start.y, contact.start.x + contact.normal.x * 15, contact.start.y + contact.normal.y * 15, 0xFFFF00FF);
-                    a->isColliding = true;
-                    b->isColliding = true;
-
-                }
-            }
-        }
+        
 
         if(body->shape->GetType() == ShapeType::CIRCLE){
 
@@ -213,6 +194,32 @@ void Application::Update(){
        
     }
 
+    for(int i = 0; i <= bodies.size() - 1; ++i){
+            for(int j = i+1; j < bodies.size(); ++j){
+                Body* a = bodies[i];
+                Body* b = bodies[j];
+
+                a->isColliding = false;
+                b->isColliding = false;
+
+                Collision::Contact contact;
+                if(Collision::IsColliding(a, b, contact)){
+
+                    // Resolve the collision using the impulse method
+                    contact.ResolveCollision();
+
+                    // Draw debug contact information
+                    Graphics::DrawFillCircle(contact.start.x, contact.start.y, 3, 0xFFFF00FF);
+                    Graphics::DrawFillCircle(contact.end.x, contact.end.y, 3, 0xFFFF00FF);
+                    Graphics::DrawLine(contact.start.x, contact.start.y, contact.start.x + contact.normal.x * 15, contact.start.y + contact.normal.y * 15, 0xFFFF00FF);
+                    a->isColliding = true;
+                    b->isColliding = true;
+                }
+
+                
+            }
+        }
+
     
 }
 
@@ -227,25 +234,19 @@ void Application::Render(){
         Graphics::DrawFillCircle(particle->position.x, particle->position.y, particle->radius, 0xFFFFFFFF);
     }
 
-    for(auto body: bodies){
-        Uint32 color = body->isColliding ? 0x991125 : 0xFFFFFFFF;
-        switch(body->shape->GetType()){
-            case ShapeType::CIRCLE:
-            {
-                CircleShape* cs = (CircleShape*) body->shape;
-                // Graphics::DrawCircle(body->position.x, body->position.y, cs->radius, body->rotation, 0xFFFFFFFF);
-                Graphics::DrawFillCircle(body->position.x, body->position.y, cs->radius, color);
-                break;
-            }
-            case ShapeType::BOX: 
-            {
-                BoxShape* bs = (BoxShape*) body->shape;
-                Graphics::DrawPolygon(body->position.x, body->position.y, bs->worldVertices, color);
-            }
-            default:
-                break;
+    for (auto body: bodies) {
+        Uint32 color = body->isColliding ? 0xFF0000FF : 0xFFFFFFFF;
+
+        if (body->shape->GetType() == ShapeType::CIRCLE) {
+            CircleShape* circleShape = (CircleShape*) body->shape;
+            Graphics::DrawFillCircle(body->position.x, body->position.y, circleShape->radius, color);
+        }
+        if (body->shape->GetType() == ShapeType::BOX) {
+            BoxShape* boxShape = (BoxShape*) body->shape;
+            Graphics::DrawPolygon(body->position.x, body->position.y, boxShape->worldVertices, color);
         }
     }
+
     Graphics::RenderFrame();
 }
 

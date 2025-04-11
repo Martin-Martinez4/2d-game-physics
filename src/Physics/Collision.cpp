@@ -1,6 +1,7 @@
 #include "Collision.h"
 #include "Body.h"
 #include "Vec2.h"
+#include <limits>
 
 
 bool Collision::IsColliding(Body* a, Body* b, Contact& contact){
@@ -8,7 +9,7 @@ bool Collision::IsColliding(Body* a, Body* b, Contact& contact){
     bool aIsCircle = a->shape->GetType() == ShapeType::CIRCLE;
     bool bIsCircle = b->shape->GetType() == ShapeType::CIRCLE;
     bool aIsPolygon = a->shape->GetType() == ShapeType::POLYGON || a->shape->GetType() == ShapeType::BOX;
-    bool bIsPolygon = b->shape->GetType() == ShapeType::POLYGON || a->shape->GetType() == ShapeType::BOX;
+    bool bIsPolygon = b->shape->GetType() == ShapeType::POLYGON || b->shape->GetType() == ShapeType::BOX;
     
     if(aIsCircle && bIsCircle){
         return IsCollidingCircleCircle(a, b, contact);
@@ -102,7 +103,7 @@ bool Collision::IsCollidingPolygonPolygon(Body* a, Body* b, Contact& contact){
     }else{
         contact.depth = -baSeparation;
         contact.normal = -bAxis.Normal();
-        contact.start = bPoint + contact.normal * contact.depth;
+        contact.start = bPoint - contact.normal * contact.depth;
         contact.end = bPoint;
     }
 

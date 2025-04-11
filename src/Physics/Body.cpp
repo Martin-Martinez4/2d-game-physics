@@ -1,6 +1,7 @@
 #include "Body.h"
 #include "Graphics.h"
 #include <cmath>
+#include <iostream>
 
 CircleShape::CircleShape(float radius): radius{radius}{};
 CircleShape::~CircleShape(){};

@@ -34,7 +34,7 @@ struct PolygonShape: public Shape {
   virtual ~PolygonShape();
   ShapeType GetType() const override;
   float GetMomentOfInertia() const override;
-  Vec2 PolygonShape::EdgeAt(int index) const;
+  Vec2 EdgeAt(int index) const;
   Shape* Clone() const override;
 
   void UpdateVertices(float angle, const Vec2& position);
@@ -68,7 +68,7 @@ struct Body {
 
     float sumTorque;
 
-    bool isColliding;
+    bool isColliding = false;
 
     float restitution = 0.0f;
 
