@@ -30,9 +30,10 @@ void Application::Setup(){
     // bodies.push_back(c1);
 
     Body* b1 = new Body(BoxShape(200, 100), Graphics::Width() / 2.0, Graphics::Height() / 2.0, 0.0);
-    Body* b2 = new Body(BoxShape(Graphics::Width()/2, 100), Graphics::Width()/2, Graphics::Height() +2, 0.0f);
-    b1->angularVelocity = 0.4;
-    b2->angularVelocity = 0.1;
+    Body* b2 = new Body(BoxShape(Graphics::Width(), 100), Graphics::Width()/2, Graphics::Height() +2, 0.0f);
+    b1->rotation = 0.4;
+    b1->restitution = 0.5;
+    b2->restitution = 0.1;
 
     bodies.push_back(b1);
     bodies.push_back(b2);
@@ -91,15 +92,16 @@ void Application::Input(){
                     // particle->radius = 5;
                     // particles.push_back(particle);
                     
-                //    Body* smallBall = new Body(CircleShape(40), x, y, 1.0);
-                //     smallBall->restitution = 0.9;
-                //     bodies.push_back(smallBall);
+                    Body* smallBall = new Body(CircleShape(30), x, y, 1.0);
+                    smallBall->restitution = 0.3;
+                    smallBall->friction = 0.4;
+                    bodies.push_back(smallBall);
 
-                    Body* box = new Body(BoxShape(50, 50), x, y, 1.0);
-                    // box->restitution = 0.9;
-                    bodies.push_back(box);
+                    // Body* box = new Body(BoxShape(50, 50), x, y, 1.0);
+                    // box->restitution = 0.2;
+                    // bodies.push_back(box);
 
-                break;
+                    break;
             // case SDL_MOUSEMOTION:
             //     int x, y;
             //     SDL_GetMouseState(&x, &y);
@@ -169,28 +171,6 @@ void Application::Update(){
         // }
 
         body->Update(deltaTime);
-
-        
-
-        if(body->shape->GetType() == ShapeType::CIRCLE){
-
-            CircleShape* cs = (CircleShape*) body->shape;
-            if (body->position.x - cs->radius <= 0) {
-                body->position.x = cs->radius;
-                body->velocity.x *= -0.9;
-            } else if (body->position.x + cs->radius >= Graphics::Width()) {
-                body->position.x = Graphics::Width() - cs->radius;
-                body->velocity.x *= -0.9;
-            }
-            if (body->position.y - cs->radius <= 0) {
-                body->position.y = cs->radius;
-                body->velocity.y *= -0.9;
-            } else if (body->position.y + cs->radius >= Graphics::Height()) {
-                body->position.y = Graphics::Height() - cs->radius;
-                body->velocity.y *= -0.9;
-            }
-        }
-
        
     }
 
@@ -208,10 +188,6 @@ void Application::Update(){
                     // Resolve the collision using the impulse method
                     contact.ResolveCollision();
 
-                    // Draw debug contact information
-                    Graphics::DrawFillCircle(contact.start.x, contact.start.y, 3, 0xFFFF00FF);
-                    Graphics::DrawFillCircle(contact.end.x, contact.end.y, 3, 0xFFFF00FF);
-                    Graphics::DrawLine(contact.start.x, contact.start.y, contact.start.x + contact.normal.x * 15, contact.start.y + contact.normal.y * 15, 0xFFFF00FF);
                     a->isColliding = true;
                     b->isColliding = true;
                 }
@@ -235,11 +211,13 @@ void Application::Render(){
     }
 
     for (auto body: bodies) {
-        Uint32 color = body->isColliding ? 0xFF0000FF : 0xFFFFFFFF;
+        // Uint32 color = body->isColliding ? 0xFF0000FF : 0xFFFFFFFF;
+        Uint32 color = 0xFFFFFFFF;
 
         if (body->shape->GetType() == ShapeType::CIRCLE) {
             CircleShape* circleShape = (CircleShape*) body->shape;
-            Graphics::DrawFillCircle(body->position.x, body->position.y, circleShape->radius, color);
+            Graphics::DrawCircle(body->position.x, body->position.y, circleShape->radius, body->rotation, color);
+            // Graphics::DrawCircle(body->position.x, body->position.y, circleShape->radius, body->rotation, color);
         }
         if (body->shape->GetType() == ShapeType::BOX) {
             BoxShape* boxShape = (BoxShape*) body->shape;

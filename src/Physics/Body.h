@@ -71,6 +71,7 @@ struct Body {
     bool isColliding = false;
 
     float restitution = 0.0f;
+    float friction = 0.7f;
 
     Shape* shape = nullptr;
 
@@ -86,6 +87,7 @@ struct Body {
     void ClearTorque();
 
     void ApplyImpulse(const Vec2& j);
+    void ApplyImpulse(const Vec2& j, const Vec2& r);
 
     void Integrate(float dt);
     void IntegrateAngular(float dt);

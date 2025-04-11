@@ -28,6 +28,8 @@ namespace Collision {
     float FindMinSeparation(const PolygonShape& a, const PolygonShape& b, Vec2& axis, Vec2& point);
     bool IsCollidingPolygonPolygon(Body* a, Body* b, Contact& contact);
 
+    bool IsCollidingPolygonCircle(Body* polygon, Body* circle, Contact& contact);
+
 
 }
 
