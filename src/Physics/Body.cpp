@@ -1,5 +1,8 @@
 #include "Body.h"
 #include "Graphics.h"
+#include <SDL_rect.h>
+#include <SDL_image.h>
+#include <SDL_surface.h>
 #include <cmath>
 #include <iostream>
 
@@ -17,6 +20,10 @@ Shape* CircleShape::Clone() const{
 
 PolygonShape::PolygonShape(const std::vector<Vec2> vertices){
   // TODO:
+  for(auto vertex: vertices){
+    this->vertices.push_back(vertex);
+    worldVertices.push_back(vertex);
+  }
 }
 PolygonShape::~PolygonShape(){
   // TODO
@@ -25,7 +32,7 @@ ShapeType PolygonShape::GetType() const{
   return ShapeType::POLYGON;
 }
 float PolygonShape::GetMomentOfInertia() const{
-  return 0.0f;
+  return 5000.0f;
 }
 Shape* PolygonShape::Clone() const{
   return new PolygonShape(vertices);
@@ -95,6 +102,16 @@ Body::Body(const Shape& shape, float x, float y, float mass) {
 
 Body::~Body() {
     delete shape;
+}
+
+// Would take out if real engine
+void Body::SetTexture(const char *textureFileName){
+  SDL_Surface* surface = IMG_Load(textureFileName);
+
+  if(surface){
+    texture = SDL_CreateTextureFromSurface(Graphics::renderer, surface);
+    SDL_FreeSurface(surface);
+  }
 }
 
 bool Body::IsStatic() const {

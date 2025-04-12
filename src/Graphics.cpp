@@ -1,12 +1,11 @@
 #include "Graphics.h"
+#include <SDL.h>
 #include <SDL_pixels.h>
 #include <SDL_rect.h>
-#include <SDL_render.h>
 #include <SDL_stdinc.h>
 #include <SDL_video.h>
 #include <cstdint>
 #include <iostream>
-#include <SDL.h>
 
 
 SDL_Window* Graphics::window = NULL;

@@ -6,9 +6,11 @@
 #include "Force.h"
 #include "Collision.h"
 #include <SDL.h>
+#include <SDL_image.h>
 #include <SDL_events.h>
 #include <SDL_keycode.h>
 #include <iostream>
+#include <vector>
 
 bool Application::IsRunning(){
     return running;
@@ -34,6 +36,8 @@ void Application::Setup(){
     b1->rotation = 0.4;
     b1->restitution = 0.5;
     b2->restitution = 0.1;
+
+    b1->SetTexture("./assets/crate.png");
 
     bodies.push_back(b1);
     bodies.push_back(b2);
@@ -69,6 +73,9 @@ void Application::Input(){
                 if(event.key.keysym.sym == SDLK_LEFT){
                     pushForce.x = -50 * PIXELS_PER_METER;
                 }
+                if(event.key.keysym.sym == SDLK_d){
+                    debug = !debug;
+                }
                 break;
             case SDL_KEYUP:
                 if(event.key.keysym.sym == SDLK_UP){
@@ -92,14 +99,27 @@ void Application::Input(){
                     // particle->radius = 5;
                     // particles.push_back(particle);
                     
-                    Body* smallBall = new Body(CircleShape(30), x, y, 1.0);
-                    smallBall->restitution = 0.3;
-                    smallBall->friction = 0.4;
-                    bodies.push_back(smallBall);
+                    // Body* smallBall = new Body(CircleShape(30), x, y, 1.0);
+                    // smallBall->restitution = 0.3;
+                    // smallBall->friction = 0.4;
+                    // bodies.push_back(smallBall);
 
                     // Body* box = new Body(BoxShape(50, 50), x, y, 1.0);
                     // box->restitution = 0.2;
                     // bodies.push_back(box);
+
+                    std::vector<Vec2> vertices = {
+                        Vec2(20,60),
+                        Vec2(-80, 20),
+                        Vec2(-20, -60),
+                        Vec2(20, -60),
+                        Vec2(40, 20)
+                    };
+
+                    Body* poly = new Body(PolygonShape(vertices), x, y, 1.0);
+                    poly->restitution = 0.1;
+                    poly->friction = 0.7;
+                    bodies.push_back(poly);
 
                     break;
             // case SDL_MOUSEMOTION:
@@ -221,7 +241,16 @@ void Application::Render(){
         }
         if (body->shape->GetType() == ShapeType::BOX) {
             BoxShape* boxShape = (BoxShape*) body->shape;
-            Graphics::DrawPolygon(body->position.x, body->position.y, boxShape->worldVertices, color);
+            if(!debug && body->texture != nullptr){
+                Graphics::DrawTexture(body->position.x, body->position.y, boxShape->width, boxShape->height, body->rotation, body->texture);
+            }else{
+
+                Graphics::DrawPolygon(body->position.x, body->position.y, boxShape->worldVertices, color);
+            }
+        }
+        if (body->shape->GetType() == ShapeType::POLYGON) {
+            PolygonShape* polygonShape = (PolygonShape*) body->shape;
+            Graphics::DrawPolygon(body->position.x, body->position.y, polygonShape->worldVertices, color);
         }
     }
 

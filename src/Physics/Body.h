@@ -1,6 +1,9 @@
 #ifndef PHYSICS_BODY_H
 #define PHYSICS_BODY_H
 
+#include "SDL_render.h"
+#include <SDL.h>
+#include <SDL2/SDL_image.h>
 #include "Vec2.h"
 #include <vector>
 
@@ -74,10 +77,12 @@ struct Body {
     float friction = 0.7f;
 
     Shape* shape = nullptr;
+    SDL_Texture* texture = nullptr;
 
     Body(const Shape& shape, float x, float y, float mass);
     ~Body();
 
+    void SetTexture(const char* textureFileName);
     bool IsStatic() const;
 
     void AddForce(const Vec2& force);

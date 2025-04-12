@@ -10,6 +10,7 @@
 class Application {
     private:
         bool running = false;
+        bool debug = false;
         std::vector<Particle*> particles;
         std::vector<Body*> bodies;
 
