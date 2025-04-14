@@ -34,6 +34,9 @@ void Application::Setup(){
 
     Body* a = new Body(CircleShape(30), Graphics::Width() / 2.0, Graphics::Height() / 2.0, 0.0f);
     Body* b = new Body(CircleShape(20), a->position.x - 100, a->position.y, 1.0f);
+
+    // a->SetTexture("./assets/basketball.png");
+
     world->AddBody(a);
     world->AddBody(b);
 

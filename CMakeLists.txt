@@ -8,18 +8,26 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 option(2DPHYSICS_VENDORED "Use vendored libraries" OFF)
 
 
+
 # https://wiki.libsdl.org/SDL2/README/cmake
 if(2DPHYSICS_VENDORED)
     add_subdirectory(vendored/sdl EXCLUDE_FROM_ALL)
-    else()
-    # 1. Look for a SDL2 package, 2. look for the SDL2 component and 3. fail if none can be found
-    find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
+else()
+  if(WIN32)
+    set(SDL2_DIR "C:/SDL2/cmake")
+    set(SDL2_image_DIR "C:/SDL2_image/cmake")
+  endif()
+  # 1. Look for a SDL2 package, 2. look for the SDL2 component and 3. fail if none can be found
+  find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
     
-    # 1. Look for a SDL2 package, 2. Look for the SDL2maincomponent and 3. DO NOT fail when SDL2main is not available
-    find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2main)
-    endif()
+  # 1. Look for a SDL2 package, 2. Look for the SDL2maincomponent and 3. DO NOT fail when SDL2main is not available
+  find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2main)
+
+  
+endif()
     
     find_package(SDL2_image REQUIRED)
+
     
     set(sources ${sources}
     #   ${CMAKE_CURRENT_SOURCE_DIR}/LinearMath/Vector.cpp
@@ -43,6 +51,7 @@ if(2DPHYSICS_VENDORED)
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Application.cpp
     )
 
+
 if(WIN32)
     # Create your game executable target as usual
     add_executable(
@@ -62,6 +71,9 @@ add_executable(
   )
 endif()
 
+message("SDL2_IMAGE_INCLUDE_DIRS: ${SDL2_IMAGE_INCLUDE_DIRS}")
+
+
 include_directories(
   ${CMAKE_PROJECT_NAME}
   PUBLIC
@@ -70,7 +82,6 @@ include_directories(
   ${SDL2_INCLUDE_DIRS}
   ${SDL2_IMAGE_INCLUDE_DIRS}
   )
-  message("SDL2IMAGE_INCLUDE_DIRS: ${SDL2_IMAGE_INCLUDE_DIRS}")
   
 
 # SDL2::SDL2main may or may not be available. It is e.g. required by Windows GUI applications
