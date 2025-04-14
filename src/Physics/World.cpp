@@ -14,6 +14,9 @@ World::~World(){
     for(auto particle: particles){
         delete particle;
     }
+    for(auto c: constraints){
+        delete c;
+    }
 }
 
 void World::AddBody(Body* body){
@@ -38,6 +41,10 @@ void World::AddTorque(float torque){
 }
 
 void World::Update(float dt){
+
+    // Create a vector of penetration constraints that will be solved frame per frame
+    std::vector<PenetrationConstraint> penetrations;
+
     for(auto body: bodies){
 
         Vec2 weight = Vec2(0.0, body->mass * gravity * PIXELS_PER_METER);
@@ -58,11 +65,44 @@ void World::Update(float dt){
     
     for(auto body: bodies){
         body->IntegrateForces(dt);
-        
+    }
+
+     for(int i = 0; i <= bodies.size() - 1; ++i){
+        for(int j = i+1; j < bodies.size(); ++j){
+            Body* a = bodies[i];
+            Body* b = bodies[j];
+
+
+            Collision::Contact contact;
+            if(Collision::IsColliding(a, b, contact)){
+
+                PenetrationConstraint pen(contact.a, contact.b, contact.start, contact.end, contact.normal);
+                penetrations.push_back(pen);
+
+            }
+        }
     }
     
-    for(auto constraint: constraints){
-        constraint->Solve();
+    // Solve all constraints
+    for (auto& constraint: constraints) {
+        constraint->PreSolve(dt);
+    }
+    for (auto& constraint: penetrations) {
+        constraint.PreSolve(dt);
+    }
+    for (int i = 0; i < 5; i++) { 
+        for (auto& constraint: constraints) {
+            constraint->Solve();
+        }
+        for (auto& constraint: penetrations) {
+            constraint.Solve();
+        }
+    }
+    for (auto& constraint: constraints) {
+        constraint->PostSolve();
+    }
+    for (auto& constraint: penetrations) {
+        constraint.PostSolve();
     }
     
     for(auto body: bodies){
@@ -70,26 +110,26 @@ void World::Update(float dt){
     }
 
 
-    CheckCollisions();
+    // CheckCollisions();
 }
 
-void World::CheckCollisions(){
-    for(int i = 0; i <= bodies.size() - 1; ++i){
-        for(int j = i+1; j < bodies.size(); ++j){
-            Body* a = bodies[i];
-            Body* b = bodies[j];
+// void World::CheckCollisions(){
+//     for(int i = 0; i <= bodies.size() - 1; ++i){
+//         for(int j = i+1; j < bodies.size(); ++j){
+//             Body* a = bodies[i];
+//             Body* b = bodies[j];
 
-            a->isColliding = false;
-            b->isColliding = false;
+//             a->isColliding = false;
+//             b->isColliding = false;
 
-            Collision::Contact contact;
-            if(Collision::IsColliding(a, b, contact)){
+//             Collision::Contact contact;
+//             if(Collision::IsColliding(a, b, contact)){
 
-                // Resolve the collision using the impulse method
-                contact.ResolveCollision();
+//                 // Resolve the collision using the impulse method
+//                 contact.ResolveCollision();
 
-            }
-        }
-    }
+//             }
+//         }
+//     }
 
-}
+// }

@@ -33,7 +33,7 @@ class World {
 
         void Update(float dt);
 
-        void CheckCollisions();
+        // void CheckCollisions();
         
 };
 

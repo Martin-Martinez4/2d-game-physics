@@ -15,34 +15,27 @@ bool Application::IsRunning(){
     return running;
 }
 
-void Application::Setup(){
-    running = Graphics::OpenWindow();
+void Application::Setup() {
+   running = Graphics::OpenWindow();
 
+    // Create a physics world with gravity of -9.8 m/s2
     world = new World(-9.8);
 
-    // Body* b1 = new Body(BoxShape(200, 100), Graphics::Width() / 2.0, Graphics::Height() / 2.0, 0.0);
-    // b1->rotation = 0.4;
-    // b1->restitution = 0.25;
-    // b1->SetTexture("./assets/crate.png");
+    // Add a static circle in the middle of the screen
+    Body* bigBall = new Body(CircleShape(64), Graphics::Width() / 2.0, Graphics::Height() / 2.0, 0.0);
+    bigBall->SetTexture("./assets/bowlingball.png");
+    world->AddBody(bigBall);
 
-    // Body* b2 = new Body(BoxShape(Graphics::Width(), 100), Graphics::Width()/2, Graphics::Height() +2, 0.0f);
-    // b2->restitution = 0.64;
-    // b2->SetTexture("./assets/metal.png");
-
-    // world->AddBody(b1);
-    // world->AddBody(b2);
-
-    Body* a = new Body(CircleShape(30), Graphics::Width() / 2.0, Graphics::Height() / 2.0, 0.0f);
-    Body* b = new Body(CircleShape(20), a->position.x - 100, a->position.y, 1.0f);
-
-    // a->SetTexture("./assets/basketball.png");
-
-    world->AddBody(a);
-    world->AddBody(b);
-
-    JointConstraint* joint = new JointConstraint(a, b, a->position);
-    world->AddConstraint(joint);
-
+    // // Add a floor and walls to contain objects objects
+    Body* floor = new Body(BoxShape(Graphics::Width() - 50, 50), Graphics::Width() / 2.0, Graphics::Height() - 50, 0.0);
+    Body* leftWall = new Body(BoxShape(50, Graphics::Height() - 100), 50, Graphics::Height() / 2.0 - 25, 0.0);
+    Body* rightWall = new Body(BoxShape(50, Graphics::Height() - 100), Graphics::Width() - 50, Graphics::Height() / 2.0 - 25, 0.0);
+    floor->restitution = 0.7;
+    leftWall->restitution = 0.2;
+    rightWall->restitution = 0.2;
+    world->AddBody(floor);
+    world->AddBody(leftWall);
+    world->AddBody(rightWall);
 }
 
 void Application::Input(){
@@ -94,23 +87,22 @@ void Application::Input(){
                    
                     
                     
-                    if(event.button.button == SDL_BUTTON_LEFT){
-
-                        Body* box = new Body(BoxShape(50, 50), x, y, 3.0);
-                        box->restitution = 0.25;
-                        box->SetTexture("./assets/crate.png");
-                        world->AddBody(box);
-                        
-                    }
-                    
-                    if(event.button.button == SDL_BUTTON_RIGHT){
-
-                        Body* smallBall = new Body(CircleShape(20), x, y, 1.0);
-                        smallBall->restitution = 0.9;
-                        smallBall->friction = 0.2;
-                        smallBall->SetTexture("./assets/basketball.png");
-                        world->AddBody(smallBall);
-                    }
+                    if (event.button.button == SDL_BUTTON_LEFT) {
+                    int x, y;
+                    SDL_GetMouseState(&x, &y);
+                    Body* ball = new Body(CircleShape(64), x, y, 1.0);
+                    ball->SetTexture("./assets/basketball.png");
+                    ball->restitution = 0.7;
+                    world->AddBody(ball);
+                }
+                if (event.button.button == SDL_BUTTON_RIGHT) {
+                    int x, y;
+                    SDL_GetMouseState(&x, &y);
+                    Body* box = new Body(BoxShape(140, 140), x, y, 1.0);
+                    box->SetTexture("./assets/crate.png");
+                    box->restitution = 0.2;
+                    world->AddBody(box);
+                }
                   
 
                     break;
@@ -141,6 +133,13 @@ void Application::Update(){
 
 void Application::Render(){
     Graphics::ClearScreen(0xFF056263);
+
+    // Draw a line between joint objects
+    for (auto joint: world->GetConstraints()) {
+        const Vec2 pa = joint->a->LocalSpaceToWorldSpace(joint->aPoint);
+        const Vec2 pb = joint->b->LocalSpaceToWorldSpace(joint->aPoint);
+        Graphics::DrawLine(pa.x, pa.y, pb.x, pb.y, 0xFFD700);
+    }
 
     std::vector<Body*> bodies = world->GetBodies();
 

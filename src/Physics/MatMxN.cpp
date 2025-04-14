@@ -1,5 +1,6 @@
 #include "MatMxN.h"
 #include "VecN.h"
+#include <cmath>
 
 MatMxN::MatMxN(): M(0), N(0), rows(nullptr) {}
 
@@ -87,7 +88,12 @@ VecN MatMxN::SolveGaussSeidel(const MatMxN& A, const VecN& b){
     for(int iterations = 0; iterations < N; ++iterations){
         for(int i = 0; i < N; ++i){
             if(A.rows[i][i] != 0.0f){
-                X[i] += (b[i] / A.rows[i][i]) - (A.rows[i].Dot(X) / A.rows[i][i]);
+                float dx = (b[i] / A.rows[i][i]) - (A.rows[i].Dot(X) / A.rows[i][i]);
+
+                // Checks for NaN
+                if(!std::isnan(dx)){
+                    X[i] += dx;
+                }
             }
         }
     }
