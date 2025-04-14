@@ -1,5 +1,6 @@
 #include "Body.h"
 #include "Graphics.h"
+#include "Vec2.h"
 #include <SDL_rect.h>
 #include <SDL_image.h>
 #include <SDL_surface.h>
@@ -17,6 +18,10 @@ float CircleShape::GetMomentOfInertia() const{
 Shape* CircleShape::Clone() const{
   return new CircleShape(radius);
 }
+void CircleShape::UpdateVertices(float angle, const Vec2& position){
+  return;
+}
+
 
 PolygonShape::PolygonShape(const std::vector<Vec2> vertices){
   // TODO:
@@ -119,6 +124,19 @@ bool Body::IsStatic() const {
   return fabs(invMass - 0.0f) < epsilon;
 }
 
+Vec2 Body::LocalSpaceToWorldSpace(const Vec2& point) const {
+  Vec2 rotated = point.Rotate(rotation);
+  return rotated + position;
+}
+
+Vec2 Body::WorldSpaceToLocalSpace(const Vec2& point) const {
+  float translatedX = point.x - position.x;
+  float translatedY = point.y - position.y;
+  float rotatedX = cos(-rotation) * translatedX - sin(-rotation) * translatedY;
+  float rotatedY = cos(-rotation) * translatedY + sin(-rotation) * translatedX;
+  return Vec2(rotatedX, rotatedY);
+}
+
 void Body::AddForce(const Vec2& force) {
     sumForces += force;
 }
@@ -134,7 +152,7 @@ void Body::ClearTorque(){
   sumTorque = 0.0;
 }
 
-void Body::ApplyImpulse(const Vec2& j){
+void Body::ApplyImpulseLinear(const Vec2& j){
   if(IsStatic()){
     return;
   }
@@ -142,8 +160,16 @@ void Body::ApplyImpulse(const Vec2& j){
   velocity += j * invMass;
 }
 
-void Body::ApplyImpulse(const Vec2& j, const Vec2& r){
+void Body::ApplyImpulseAngular(const float j){
    if(IsStatic()){
+    return;
+  }
+
+  angularVelocity += j * invI;
+}
+
+void Body::ApplyImpulseAtPoint(const Vec2& j, const Vec2& r){
+  if(IsStatic()){
     return;
   }
 
@@ -152,19 +178,19 @@ void Body::ApplyImpulse(const Vec2& j, const Vec2& r){
 }
 
 
-void Body::Integrate(float dt) {
+// void Body::Integrate(float dt) {
 
-  if(IsStatic()){
-    return;
-  }
+//   if(IsStatic()){
+//     return;
+//   }
 
-  acceleration = sumForces * invMass;
-  velocity += acceleration * dt;
+//   acceleration = sumForces * invMass;
+//   velocity += acceleration * dt;
 
-  position += velocity * dt;
+//   position += velocity * dt;
 
-  ClearForces();
-}
+//   ClearForces();
+// }
 
 void Body::IntegrateAngular(float dt){
   if(IsStatic()){
@@ -180,22 +206,32 @@ void Body::IntegrateAngular(float dt){
   ClearTorque();
 }
 
-void Body::Update(float dt){
-  Integrate(dt);
-  IntegrateAngular(dt);
+void Body::IntegrateForces(const float dt){
+  if(IsStatic()){
+    return;
+  }
 
-  switch(shape->GetType()){
-    
-    case ShapeType::POLYGON:
-    case ShapeType::BOX:
-    {
-        PolygonShape* ps = (PolygonShape*) shape;
-        ps->UpdateVertices(rotation, position);
-        break;
-    }
-    default:
-        break;
+  acceleration = sumForces * invMass;
+  velocity += acceleration * dt;
+
+  angularAcceleration = sumTorque * invI;
+  angularVelocity += angularAcceleration * dt;
+
+  ClearForces();
+  ClearTorque();
 }
+
+void Body::IntegrateVelocities(const float dt){
+  if (IsStatic()){
+
+    return;
+  }
+
+  position += velocity * dt;
+
+  rotation += angularVelocity * dt;
+
+  shape->UpdateVertices(rotation, position);
 }
 
 

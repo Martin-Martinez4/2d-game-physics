@@ -240,6 +240,9 @@ void Collision::Contact::ResolvePenetration(){
     
     a->position -= normal * da;
     b->position += normal * db;
+
+    a->shape->UpdateVertices(a->rotation, a->position);
+    b->shape->UpdateVertices(b->rotation, b->position);
 }
 
 void Collision::Contact::ResolveCollision(){
@@ -271,8 +274,8 @@ void Collision::Contact::ResolveCollision(){
 
     Vec2 j = jN + jT;
 
-    a->ApplyImpulse(j, ra);
-    b->ApplyImpulse(-j, rb);
+    a->ApplyImpulseAtPoint(j, ra);
+    b->ApplyImpulseAtPoint(-j, rb);
 }
 
 

@@ -18,6 +18,7 @@ struct Shape {
   virtual ShapeType GetType() const = 0;
   virtual float GetMomentOfInertia() const = 0;
   virtual Shape* Clone() const = 0;
+  virtual void UpdateVertices(float angle, const Vec2& position) = 0;
 };
 struct CircleShape: public Shape {
   float radius;
@@ -27,6 +28,8 @@ struct CircleShape: public Shape {
   ShapeType GetType() const override;
   float GetMomentOfInertia() const override;
   Shape* Clone() const override;
+  virtual void UpdateVertices(float angle, const Vec2& position) override;
+
 };
 struct PolygonShape: public Shape {
   std::vector<Vec2> vertices;
@@ -40,7 +43,7 @@ struct PolygonShape: public Shape {
   Vec2 EdgeAt(int index) const;
   Shape* Clone() const override;
 
-  void UpdateVertices(float angle, const Vec2& position);
+  virtual void UpdateVertices(float angle, const Vec2& position) override;
 };
 struct BoxShape: public PolygonShape {
   float width, height;
@@ -85,19 +88,25 @@ struct Body {
     void SetTexture(const char* textureFileName);
     bool IsStatic() const;
 
+    
     void AddForce(const Vec2& force);
     void ClearForces();
-
+    
     void AddTorque(float torque);
     void ClearTorque();
 
-    void ApplyImpulse(const Vec2& j);
-    void ApplyImpulse(const Vec2& j, const Vec2& r);
+    Vec2 LocalSpaceToWorldSpace(const Vec2& point) const;
+    Vec2 WorldSpaceToLocalSpace(const Vec2& point) const;
 
-    void Integrate(float dt);
+    void ApplyImpulseLinear(const Vec2& j);
+    void ApplyImpulseAngular(const float j);
+    void ApplyImpulseAtPoint(const Vec2& j, const Vec2& r);
+
+    void IntegrateLinear(float dt);
     void IntegrateAngular(float dt);
 
-    void Update(float dt);
+    void IntegrateForces(const float dt);
+    void IntegrateVelocities(const float dt);
 };
 
 #endif

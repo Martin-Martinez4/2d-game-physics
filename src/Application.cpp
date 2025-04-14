@@ -1,15 +1,14 @@
 #include "Application.h"
+#include "Constraint.h"
 #include "Graphics.h"
 #include "Vec2.h"
 #include "Constants.h"
 #include "Body.h"
-#include "Force.h"
-#include "Collision.h"
+#include "World.h"
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_events.h>
 #include <SDL_keycode.h>
-#include <iostream>
 #include <vector>
 
 bool Application::IsRunning(){
@@ -19,33 +18,27 @@ bool Application::IsRunning(){
 void Application::Setup(){
     running = Graphics::OpenWindow();
 
-    // Particle* smallBall = new Particle(50, 100, 1.0f);
-    // smallBall->radius = 4;
-    // particles.push_back(smallBall);
+    world = new World(-9.8);
 
-    // Particle* bigBall = new Particle(200, 100, 3.0);
-    // bigBall->radius = 12;
-    // particles.push_back(bigBall);
+    // Body* b1 = new Body(BoxShape(200, 100), Graphics::Width() / 2.0, Graphics::Height() / 2.0, 0.0);
+    // b1->rotation = 0.4;
+    // b1->restitution = 0.25;
+    // b1->SetTexture("./assets/crate.png");
 
-    // Body* c1 = new Body(CircleShape(50), Graphics::Width() / 2.0, Graphics::Height() / 2.0, 0.0);
-    // c1->restitution = 0.0;
-    // bodies.push_back(c1);
+    // Body* b2 = new Body(BoxShape(Graphics::Width(), 100), Graphics::Width()/2, Graphics::Height() +2, 0.0f);
+    // b2->restitution = 0.64;
+    // b2->SetTexture("./assets/metal.png");
 
-    Body* b1 = new Body(BoxShape(200, 100), Graphics::Width() / 2.0, Graphics::Height() / 2.0, 0.0);
-    Body* b2 = new Body(BoxShape(Graphics::Width(), 100), Graphics::Width()/2, Graphics::Height() +2, 0.0f);
-    b1->rotation = 0.4;
-    b1->restitution = 0.5;
-    b2->restitution = 0.1;
+    // world->AddBody(b1);
+    // world->AddBody(b2);
 
-    b1->SetTexture("./assets/crate.png");
+    Body* a = new Body(CircleShape(30), Graphics::Width() / 2.0, Graphics::Height() / 2.0, 0.0f);
+    Body* b = new Body(CircleShape(20), a->position.x - 100, a->position.y, 1.0f);
+    world->AddBody(a);
+    world->AddBody(b);
 
-    bodies.push_back(b1);
-    bodies.push_back(b2);
-
-    // liquid.x = 0;
-    // liquid.y = Graphics::Height() /2;
-    // liquid.w = Graphics::Width();
-    // liquid.h = Graphics::Height() /2;
+    JointConstraint* joint = new JointConstraint(a, b, a->position);
+    world->AddConstraint(joint);
 
 }
 
@@ -93,41 +86,32 @@ void Application::Input(){
                 break;
             case SDL_MOUSEBUTTONDOWN:
 
-                    int x,y;
-                    SDL_GetMouseState(&x, &y);
-                    // Particle* particle = new Particle(x, y, 1.0);
-                    // particle->radius = 5;
-                    // particles.push_back(particle);
+                    int x = event.button.x;
+                    int y = event.button.y;
+                   
                     
-                    // Body* smallBall = new Body(CircleShape(30), x, y, 1.0);
-                    // smallBall->restitution = 0.3;
-                    // smallBall->friction = 0.4;
-                    // bodies.push_back(smallBall);
+                    
+                    if(event.button.button == SDL_BUTTON_LEFT){
 
-                    // Body* box = new Body(BoxShape(50, 50), x, y, 1.0);
-                    // box->restitution = 0.2;
-                    // bodies.push_back(box);
+                        Body* box = new Body(BoxShape(50, 50), x, y, 3.0);
+                        box->restitution = 0.25;
+                        box->SetTexture("./assets/crate.png");
+                        world->AddBody(box);
+                        
+                    }
+                    
+                    if(event.button.button == SDL_BUTTON_RIGHT){
 
-                    std::vector<Vec2> vertices = {
-                        Vec2(20,60),
-                        Vec2(-80, 20),
-                        Vec2(-20, -60),
-                        Vec2(20, -60),
-                        Vec2(40, 20)
-                    };
-
-                    Body* poly = new Body(PolygonShape(vertices), x, y, 1.0);
-                    poly->restitution = 0.1;
-                    poly->friction = 0.7;
-                    bodies.push_back(poly);
+                        Body* smallBall = new Body(CircleShape(20), x, y, 1.0);
+                        smallBall->restitution = 0.9;
+                        smallBall->friction = 0.2;
+                        smallBall->SetTexture("./assets/basketball.png");
+                        world->AddBody(smallBall);
+                    }
+                  
 
                     break;
-            // case SDL_MOUSEMOTION:
-            //     int x, y;
-            //     SDL_GetMouseState(&x, &y);
-            //     bodies[0]->position.x = x;
-            //     bodies[0]->position.y = y;
-            //     break;
+           
         }
     }
 }
@@ -147,88 +131,15 @@ void Application::Update(){
 
     timePreviousFrame = SDL_GetTicks();
 
-    Vec2 wind = Vec2(0.2 * PIXELS_PER_METER, 0.0);
-    Vec2 weight = Vec2(0.0f, 9.8 * PIXELS_PER_METER);
+    // Vec2 wind = Vec2(0.2 * PIXELS_PER_METER, 0.0);
 
-    for(auto particle: particles){
-        particle->AddForce(wind);
-        particle->AddForce(weight * particle->mass);
-        particle->AddForce(pushForce);
-        particle->Integrate(deltaTime);
-
-        if(particle->position.y >= liquid.y){
-            Vec2 drag = GenerateDragForce(*particle, 0.05, deltaTime);
-            particle->AddForce(drag);
-        }
-
-         if (particle->position.x - particle->radius <= 0) {
-            particle->position.x = particle->radius;
-            particle->velocity.x *= -0.9;
-        } else if (particle->position.x + particle->radius >= Graphics::Width()) {
-            particle->position.x = Graphics::Width() - particle->radius;
-            particle->velocity.x *= -0.9;
-        }
-        if (particle->position.y - particle->radius <= 0) {
-            particle->position.y = particle->radius;
-            particle->velocity.y *= -0.9;
-        } else if (particle->position.y + particle->radius >= Graphics::Height()) {
-            particle->position.y = Graphics::Height() - particle->radius;
-            particle->velocity.y *= -0.9;
-        }
-    }
-
-    for(auto body: bodies){
-        // body->AddForce(wind);
-        body->AddForce(weight * body->mass);
-        body->AddForce(pushForce);
-
-        // float torque = 20;
-        // body->AddTorque(torque);
-
-        // if(body->position.y >= liquid.y){
-        //     Vec2 drag = GenerateDragForce(*body, 0.05, deltaTime);
-        //     body->AddForce(drag);
-        // }
-
-        body->Update(deltaTime);
-       
-    }
-
-    for(int i = 0; i <= bodies.size() - 1; ++i){
-            for(int j = i+1; j < bodies.size(); ++j){
-                Body* a = bodies[i];
-                Body* b = bodies[j];
-
-                a->isColliding = false;
-                b->isColliding = false;
-
-                Collision::Contact contact;
-                if(Collision::IsColliding(a, b, contact)){
-
-                    // Resolve the collision using the impulse method
-                    contact.ResolveCollision();
-
-                    a->isColliding = true;
-                    b->isColliding = true;
-                }
-
-                
-            }
-        }
-
-    
+    world->Update(deltaTime);
 }
 
 void Application::Render(){
     Graphics::ClearScreen(0xFF056263);
 
-    // Graphics::DrawFillRect(liquid.x, liquid.y, liquid.w, liquid.h,  0xFF13376E);
-    // Graphics::DrawFillRect(0, 0, 100, 50,  0xFF13376E);
-
-    for(auto particle: particles){
-
-        Graphics::DrawFillCircle(particle->position.x, particle->position.y, particle->radius, 0xFFFFFFFF);
-    }
+    std::vector<Body*> bodies = world->GetBodies();
 
     for (auto body: bodies) {
         // Uint32 color = body->isColliding ? 0xFF0000FF : 0xFFFFFFFF;
@@ -236,8 +147,12 @@ void Application::Render(){
 
         if (body->shape->GetType() == ShapeType::CIRCLE) {
             CircleShape* circleShape = (CircleShape*) body->shape;
-            Graphics::DrawCircle(body->position.x, body->position.y, circleShape->radius, body->rotation, color);
-            // Graphics::DrawCircle(body->position.x, body->position.y, circleShape->radius, body->rotation, color);
+            if(!debug && body->texture != nullptr){
+                Graphics::DrawTexture(body->position.x, body->position.y, circleShape->radius*2, circleShape->radius*2, body->rotation, body->texture);
+            }else{
+                Graphics::DrawCircle(body->position.x, body->position.y, circleShape->radius, body->rotation, color);
+                // Graphics::DrawCircle(body->position.x, body->position.y, circleShape->radius, body->rotation, color);
+            }
         }
         if (body->shape->GetType() == ShapeType::BOX) {
             BoxShape* boxShape = (BoxShape*) body->shape;
@@ -250,7 +165,13 @@ void Application::Render(){
         }
         if (body->shape->GetType() == ShapeType::POLYGON) {
             PolygonShape* polygonShape = (PolygonShape*) body->shape;
-            Graphics::DrawPolygon(body->position.x, body->position.y, polygonShape->worldVertices, color);
+            if(!debug){
+                // Graphics::DrawTexture(body->position.x, body->position.y, CircleShape->radius*2, int height, float rotation, SDL_Texture *texture)
+                Graphics::DrawFillPolygon(body->position.x, body->position.y, polygonShape->worldVertices, color);
+            }else{
+
+                Graphics::DrawPolygon(body->position.x, body->position.y, polygonShape->worldVertices, color);
+            }
         }
     }
 
@@ -258,10 +179,7 @@ void Application::Render(){
 }
 
 void Application::Destroy(){
-    // destroy all objects in the scene
-    for(auto particle: particles){
-        delete particle;
-    }
+    delete world;
 
     Graphics::CloseWindow();
 }

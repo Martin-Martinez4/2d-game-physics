@@ -1,9 +1,7 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
-#include "Particle.h"
-#include "Body.h"
-#include <vector>
+#include "World.h"
 #include <SDL_rect.h>
 
 
@@ -11,8 +9,9 @@ class Application {
     private:
         bool running = false;
         bool debug = false;
-        std::vector<Particle*> particles;
-        std::vector<Body*> bodies;
+
+        World* world;
+  
 
         Vec2 pushForce = {0.0f, 0.0f};
         SDL_Rect liquid;

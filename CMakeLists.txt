@@ -29,6 +29,12 @@ if(2DPHYSICS_VENDORED)
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Physics/Force.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Physics/Collision.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Physics/Body.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Physics/World.cpp
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Physics/VecN.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Physics/MatMxN.cpp
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Physics/Constraint.cpp
     
     )
     

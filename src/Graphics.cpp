@@ -14,11 +14,13 @@ int Graphics::windowWidth = 10;
 int Graphics::windowHeight = 10;
 
 int Graphics::Width() {
-    return windowWidth;
+    // return windowWidth;
+    return 1920;
 }
 
 int Graphics::Height() {
-    return windowHeight;
+    // return windowHeight;
+    return 1080;
 }
 
 bool Graphics::OpenWindow() {
@@ -31,7 +33,7 @@ bool Graphics::OpenWindow() {
     SDL_GetCurrentDisplayMode(0, &display_mode);
     windowWidth = display_mode.w;
     windowHeight = display_mode.h;
-    window = SDL_CreateWindow(NULL, 0, 0, windowWidth, windowHeight, SDL_WINDOW_BORDERLESS);
+    window = SDL_CreateWindow(NULL, 0, 0, windowWidth, windowHeight, SDL_WINDOW_SHOWN);
     if (!window) {
         std::cerr << "Error creating SDL window" << std::endl;
         return false;
@@ -41,6 +43,8 @@ bool Graphics::OpenWindow() {
         std::cerr << "Error creating SDL renderer" << std::endl;
         return false;
     }
+    SDL_RenderSetLogicalSize(renderer, Width(), Height());
+    // SDL_RenderSetScale(renderer, 2, 2);
     return true;
 }
 
