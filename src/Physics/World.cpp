@@ -6,7 +6,7 @@
 #include "Vec2.h"
 #include <vector>
 
-World::World(float gravity):gravity(-gravity){}
+World::World(float gravity, float pixelsPerMeter):gravity(-gravity), pixelsPerMeter(pixelsPerMeter){}
 World::~World(){
     for(auto body: bodies){
         delete body;
@@ -47,7 +47,7 @@ void World::Update(float dt){
 
     for(auto body: bodies){
 
-        Vec2 weight = Vec2(0.0, body->mass * gravity * PIXELS_PER_METER);
+        Vec2 weight = Vec2(0.0, body->mass * gravity * pixelsPerMeter);
 
         body->AddForce(weight);
 

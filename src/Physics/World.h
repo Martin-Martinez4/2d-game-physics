@@ -9,7 +9,9 @@
 class World {
 
     private:
-    float gravity = 9.8;
+        float gravity = 9.8;
+        float pixelsPerMeter = 50.0f;
+
         std::vector<Body*> bodies;
         std::vector<Particle*> particles;
 
@@ -19,7 +21,7 @@ class World {
         std::vector<float> torques;
 
     public:
-        World(float gravity);
+        World(float gravity, float pixelsPerMeter);
         ~World();
 
         void AddBody(Body* body);

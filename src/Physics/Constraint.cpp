@@ -1,6 +1,7 @@
 #include "Constraint.h"
 #include "MatMxN.h"
 #include "Vec2.h"
+#include <algorithm>
 
 MatMxN Constraint::GetInvM() const {
     MatMxN invM(6, 6);
@@ -115,22 +116,20 @@ void JointConstraint::Solve(){
 
 void JointConstraint::PostSolve(){}
 
-PenetrationConstraint::PenetrationConstraint(): Constraint(), jacobian(2, 6), cachedLambda(1), bias(0.0f){
+PenetrationConstraint::PenetrationConstraint(): Constraint(), jacobian(2, 6), cachedLambda(2), bias(0.0f) {
     cachedLambda.Zero();
     friction = 0.0f;
 }
 
-PenetrationConstraint::PenetrationConstraint(Body* a, Body* b, const Vec2& aCollisionPoint, const Vec2& bCollisionPoint, const Vec2& normal): Constraint(), jacobian(2, 6), cachedLambda(1), bias(0.0f){
 
+PenetrationConstraint::PenetrationConstraint(Body* a, Body* b, const Vec2& aCollisionPoint, const Vec2& bCollisionPoint, const Vec2& normal): Constraint(), jacobian(2, 6), cachedLambda(2), bias(0.0f) {
     this->a = a;
     this->b = b;
     this->aPoint = a->WorldSpaceToLocalSpace(aCollisionPoint);
     this->bPoint = b->WorldSpaceToLocalSpace(bCollisionPoint);
     this->normal = a->WorldSpaceToLocalSpace(normal);
     cachedLambda.Zero();
-
     friction = 0.0f;
-
 }
 
 void PenetrationConstraint::PreSolve(const float dt) {
@@ -163,12 +162,12 @@ void PenetrationConstraint::PreSolve(const float dt) {
     friction = std::max(a->friction, b->friction);
     if(friction > 0.0f){
         Vec2 t = n.Normal();
-        jacobian[1][0] = -t.x;
-        jacobian[1][1] = -t.y;
-        jacobian[1][2] = -ra.Cross(t);
-        jacobian[1][3] = t.x;
-        jacobian[1][4] = t.y;
-        jacobian[1][5] = rb.Cross(t);
+        jacobian.rows[1][0] = -t.x;
+        jacobian.rows[1][1] = -t.y;
+        jacobian.rows[1][2] = -ra.Cross(t);
+        jacobian.rows[1][3] = t.x;
+        jacobian.rows[1][4] = t.y;
+        jacobian.rows[1][5] = rb.Cross(t);
     }
 
     // Warm starting (apply cached lambda)
@@ -185,7 +184,14 @@ void PenetrationConstraint::PreSolve(const float dt) {
     const float beta = 0.2f;
     float C = (pb - pa).Dot(-n);
     C = std::min(0.0f, C + 0.01f);
-    bias = (beta / dt) * C;
+    
+    Vec2 va = a->velocity + Vec2(-a->angularVelocity * ra.y, a->angularVelocity * ra.x);
+    Vec2 vb= b->velocity + Vec2(-b->angularVelocity * rb.y, b->angularVelocity * rb.x);
+    float vrelDotNormal = (va - vb).Dot(n);
+    
+    float e = std::min(a->restitution, b->restitution);
+    
+    bias = (beta / dt) * C + (e * vrelDotNormal);
 }
 
 void PenetrationConstraint::Solve() {
@@ -205,6 +211,12 @@ void PenetrationConstraint::Solve() {
     VecN oldLambda = cachedLambda;
     cachedLambda += lambda;
     cachedLambda[0] = (cachedLambda[0] < 0.0f) ? 0.0f : cachedLambda[0];
+
+    if(friction > 0.0){
+        const float maxFriction = cachedLambda[0] * friction;
+        cachedLambda[1] = std::clamp(cachedLambda[1], -maxFriction, maxFriction);
+    }
+
     lambda = cachedLambda - oldLambda;
 
     // Compute the impulses with both direction and magnitude

@@ -10,6 +10,7 @@
 #include <SDL_events.h>
 #include <SDL_keycode.h>
 #include <vector>
+#include <iostream>
 
 bool Application::IsRunning(){
     return running;
@@ -17,9 +18,14 @@ bool Application::IsRunning(){
 
 void Application::Setup() {
    running = Graphics::OpenWindow();
+   
+   SDL_DisplayMode display_mode;
+   SDL_GetCurrentDisplayMode(0, &display_mode);
+
+   debug = true;
 
     // Create a physics world with gravity of -9.8 m/s2
-    world = new World(-9.8);
+    world = new World(-9.8, 50);
 
     // Add a static circle in the middle of the screen
     Body* bigBall = new Body(CircleShape(64), Graphics::Width() / 2.0, Graphics::Height() / 2.0, 0.0);
@@ -88,17 +94,15 @@ void Application::Input(){
                     
                     
                     if (event.button.button == SDL_BUTTON_LEFT) {
-                    int x, y;
-                    SDL_GetMouseState(&x, &y);
-                    Body* ball = new Body(CircleShape(64), x, y, 1.0);
+                    
+                    Body* ball = new Body(CircleShape(64), x, y, 2.0);
                     ball->SetTexture("./assets/basketball.png");
                     ball->restitution = 0.7;
                     world->AddBody(ball);
                 }
                 if (event.button.button == SDL_BUTTON_RIGHT) {
-                    int x, y;
-                    SDL_GetMouseState(&x, &y);
-                    Body* box = new Body(BoxShape(140, 140), x, y, 1.0);
+                    
+                    Body* box = new Body(BoxShape(140, 140), x, y, 4.0);
                     box->SetTexture("./assets/crate.png");
                     box->restitution = 0.2;
                     world->AddBody(box);
@@ -127,6 +131,8 @@ void Application::Update(){
     timePreviousFrame = SDL_GetTicks();
 
     // Vec2 wind = Vec2(0.2 * PIXELS_PER_METER, 0.0);
+
+
 
     world->Update(deltaTime);
 }

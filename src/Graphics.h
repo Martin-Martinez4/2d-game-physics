@@ -7,6 +7,7 @@
 #include <vector>
 #include "Vec2.h"
 
+const int PIXELS_PER_METER = 50;
 
 struct Graphics {
     static int windowWidth;
