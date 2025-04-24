@@ -28,9 +28,9 @@ void Application::Setup() {
     world = new World(-9.8, 50);
 
     // Add a static circle in the middle of the screen
-    Body* bigBall = new Body(CircleShape(64), Graphics::Width() / 2.0, Graphics::Height() / 2.0, 0.0);
-    bigBall->SetTexture("./assets/bowlingball.png");
-    world->AddBody(bigBall);
+    // Body* bigBall = new Body(CircleShape(64), Graphics::Width() / 2.0, Graphics::Height() / 2.0, 0.0);
+    // bigBall->SetTexture("./assets/bowlingball.png");
+    // world->AddBody(bigBall);
 
     // // Add a floor and walls to contain objects objects
     Body* floor = new Body(BoxShape(Graphics::Width() - 50, 50), Graphics::Width() / 2.0, Graphics::Height() - 50, 0.0);
@@ -97,7 +97,7 @@ void Application::Input(){
                     
                     Body* ball = new Body(CircleShape(64), x, y, 2.0);
                     ball->SetTexture("./assets/basketball.png");
-                    ball->restitution = 0.7;
+                    ball->restitution = 0.9;
                     world->AddBody(ball);
                 }
                 if (event.button.button == SDL_BUTTON_RIGHT) {
@@ -115,74 +115,58 @@ void Application::Input(){
     }
 }
 
-void Application::Update(){
-
+void Application::Update() {
+    Graphics::ClearScreen(0xFF0F0721);
+    
+    // Wait some time until the reach the target frame time in milliseconds
     static int timePreviousFrame;
     int timeToWait = MILLISECS_PER_FRAME - (SDL_GetTicks() - timePreviousFrame);
-    if(timeToWait > 0){
+    if (timeToWait > 0)
         SDL_Delay(timeToWait);
-    }
 
-    float deltaTime = (SDL_GetTicks() - timePreviousFrame)/1000.0f;
-    if(deltaTime > 0.016){
+    // Calculate the deltatime in seconds
+    float deltaTime = (SDL_GetTicks() - timePreviousFrame) / 1000.0f;
+    if (deltaTime > 0.016)
         deltaTime = 0.016;
-    }
 
+    // Set the time of the current frame to be used in the next one
     timePreviousFrame = SDL_GetTicks();
 
-    // Vec2 wind = Vec2(0.2 * PIXELS_PER_METER, 0.0);
-
-
-
+    // Update world bodies (integration, collision detection, etc.)
     world->Update(deltaTime);
 }
 
-void Application::Render(){
-    Graphics::ClearScreen(0xFF056263);
-
-    // Draw a line between joint objects
-    for (auto joint: world->GetConstraints()) {
-        const Vec2 pa = joint->a->LocalSpaceToWorldSpace(joint->aPoint);
-        const Vec2 pb = joint->b->LocalSpaceToWorldSpace(joint->aPoint);
-        Graphics::DrawLine(pa.x, pa.y, pb.x, pb.y, 0xFFD700);
-    }
-
-    std::vector<Body*> bodies = world->GetBodies();
-
-    for (auto body: bodies) {
-        // Uint32 color = body->isColliding ? 0xFF0000FF : 0xFFFFFFFF;
-        Uint32 color = 0xFFFFFFFF;
-
+///////////////////////////////////////////////////////////////////////////////
+// Render function (called several times per second to draw objects)
+///////////////////////////////////////////////////////////////////////////////
+void Application::Render() {
+    // Draw all bodies
+    for (auto body: world->GetBodies()) {
         if (body->shape->GetType() == ShapeType::CIRCLE) {
             CircleShape* circleShape = (CircleShape*) body->shape;
-            if(!debug && body->texture != nullptr){
-                Graphics::DrawTexture(body->position.x, body->position.y, circleShape->radius*2, circleShape->radius*2, body->rotation, body->texture);
-            }else{
-                Graphics::DrawCircle(body->position.x, body->position.y, circleShape->radius, body->rotation, color);
-                // Graphics::DrawCircle(body->position.x, body->position.y, circleShape->radius, body->rotation, color);
+            if (!debug && body->texture) {
+                Graphics::DrawTexture(body->position.x, body->position.y, circleShape->radius * 2, circleShape->radius * 2, body->rotation, body->texture);
+            } else {
+                Graphics::DrawCircle(body->position.x, body->position.y, circleShape->radius, body->rotation, 0xFF00FF00);
             }
         }
         if (body->shape->GetType() == ShapeType::BOX) {
             BoxShape* boxShape = (BoxShape*) body->shape;
-            if(!debug && body->texture != nullptr){
+            if (!debug && body->texture) {
                 Graphics::DrawTexture(body->position.x, body->position.y, boxShape->width, boxShape->height, body->rotation, body->texture);
-            }else{
-
-                Graphics::DrawPolygon(body->position.x, body->position.y, boxShape->worldVertices, color);
+            } else {
+                Graphics::DrawPolygon(body->position.x, body->position.y, boxShape->worldVertices, 0xFF00FF00);
             }
         }
         if (body->shape->GetType() == ShapeType::POLYGON) {
             PolygonShape* polygonShape = (PolygonShape*) body->shape;
-            if(!debug){
-                // Graphics::DrawTexture(body->position.x, body->position.y, CircleShape->radius*2, int height, float rotation, SDL_Texture *texture)
-                Graphics::DrawFillPolygon(body->position.x, body->position.y, polygonShape->worldVertices, color);
-            }else{
-
-                Graphics::DrawPolygon(body->position.x, body->position.y, polygonShape->worldVertices, color);
+            if (!debug) {
+                Graphics::DrawFillPolygon(body->position.x, body->position.y, polygonShape->worldVertices, 0xFF444444);
+            } else {
+                Graphics::DrawPolygon(body->position.x, body->position.y, polygonShape->worldVertices, 0xFF00FF00);
             }
         }
     }
-
     Graphics::RenderFrame();
 }
 

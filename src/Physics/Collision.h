@@ -3,6 +3,7 @@
 
 #include "Body.h"
 #include "Vec2.h"
+#include <vector>
 
 namespace Collision {
 
@@ -17,18 +18,18 @@ namespace Collision {
         float depth;
 
 
-        void ResolvePenetration();
-        void ResolveCollision();
+        // void ResolvePenetration();
+        // void ResolveCollision();
     };
 
 
-    bool IsColliding(Body* a, Body* b, Contact& contact);
-    bool IsCollidingCircleCircle(Body* a, Body* b, Contact& contact);
+    bool IsColliding(Body* a, Body* b, std::vector<Contact>& contacts);
+    bool IsCollidingCircleCircle(Body* a, Body* b, std::vector<Contact>& contacts);
 
-    float FindMinSeparation(const PolygonShape& a, const PolygonShape& b, Vec2& axis, Vec2& point);
-    bool IsCollidingPolygonPolygon(Body* a, Body* b, Contact& contact);
+    float FindMinSeparation(const PolygonShape& a, const PolygonShape& b, int& indexReferenceEdge, Vec2& supportPoint);
+    bool IsCollidingPolygonPolygon(Body* a, Body* b, std::vector<Contact>& contacts);
 
-    bool IsCollidingPolygonCircle(Body* polygon, Body* circle, Contact& contact);
+    bool IsCollidingPolygonCircle(Body* polygon, Body* circle, std::vector<Contact>& contacts);
 
 
 }

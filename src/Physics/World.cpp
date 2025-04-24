@@ -73,11 +73,15 @@ void World::Update(float dt){
             Body* b = bodies[j];
 
 
-            Collision::Contact contact;
-            if(Collision::IsColliding(a, b, contact)){
+            std::vector<Collision::Contact> contacts;
+            if(Collision::IsColliding(a, b, contacts)){
 
-                PenetrationConstraint pen(contact.a, contact.b, contact.start, contact.end, contact.normal);
-                penetrations.push_back(pen);
+                for(auto contact: contacts){
+                    
+                    PenetrationConstraint pen(contact.a, contact.b, contact.start, contact.end, contact.normal);
+                    penetrations.push_back(pen);
+                }
+                
 
             }
         }
@@ -90,7 +94,7 @@ void World::Update(float dt){
     for (auto& constraint: penetrations) {
         constraint.PreSolve(dt);
     }
-    for (int i = 0; i < 5; i++) { 
+    for (int i = 0; i < 10; i++) { 
         for (auto& constraint: constraints) {
             constraint->Solve();
         }

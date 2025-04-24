@@ -6,6 +6,7 @@
 #include <SDL_surface.h>
 #include <cmath>
 #include <iostream>
+#include <limits>
 
 CircleShape::CircleShape(float radius): radius{radius}{};
 CircleShape::~CircleShape(){};
@@ -36,6 +37,48 @@ PolygonShape::~PolygonShape(){
 ShapeType PolygonShape::GetType() const{
   return ShapeType::POLYGON;
 }
+
+int PolygonShape::ClipSegmentToLine(const std::vector<Vec2>& contactsIn, std::vector<Vec2>& contactsOut, const Vec2& c0, const Vec2& c1) const {
+  // Start with no output points
+  int numOut = 0;
+
+  // Calculate the distance of end points to the line
+  Vec2 normal = (c1 - c0).Normalize();
+  float dist0 = (contactsIn[0] - c0).Cross(normal);
+  float dist1 = (contactsIn[1] - c0).Cross(normal);
+
+  // If the points are behind the plane
+  if (dist0 <= 0)
+      contactsOut[numOut++] = contactsIn[0];
+  if (dist1 <= 0)
+      contactsOut[numOut++] = contactsIn[1];
+
+  // If the points are on different sides of the plane (one distance is negative and the other is positive)
+  if (dist0 * dist1 < 0) {
+      float totalDist = dist0 - dist1;
+
+      // Fint the intersection using linear interpolation: lerp(start,end) => start + t*(end-start)
+      float t = dist0 / (totalDist);
+      Vec2 contact = contactsIn[0] + (contactsIn[1] - contactsIn[0]) * t;
+      contactsOut[numOut] = contact;
+      numOut++;
+  }
+  return numOut;
+}
+int PolygonShape::FindIncidentEdge(const Vec2& normal) const {
+  int indexIncidentEdge;
+  float minProj = std::numeric_limits<float>::max();
+  for (int i = 0; i < this->worldVertices.size(); ++i) {
+      auto edgeNormal = this->EdgeAt(i).Normal();
+      auto proj = edgeNormal.Dot(normal);
+      if (proj < minProj) {
+          minProj = proj;
+          indexIncidentEdge = i;
+      }
+  }
+  return indexIncidentEdge;
+}
+
 float PolygonShape::GetMomentOfInertia() const{
   return 5000.0f;
 }

@@ -39,6 +39,8 @@ struct PolygonShape: public Shape {
   PolygonShape(const std::vector<Vec2> vertices);
   virtual ~PolygonShape();
   ShapeType GetType() const override;
+  int ClipSegmentToLine(const std::vector<Vec2>& contactsIn, std::vector<Vec2>& contactsOut, const Vec2& c0, const Vec2& c1) const;
+  int FindIncidentEdge(const Vec2& normal) const;
   float GetMomentOfInertia() const override;
   Vec2 EdgeAt(int index) const;
   Shape* Clone() const override;

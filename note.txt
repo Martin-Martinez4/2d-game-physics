@@ -6,3 +6,5 @@ To get it to run on Windows had to run (SDL2 source was put into a folder called
 - env vars must point to the x64 lib files in C:/SDL2 (or place SDL2 is installed)
 
 - Opening the resulting exe from terminal does not open the window.  
+
+To get sdl2_image to work on Linux had to follow suggestions from here: https://stackoverflow.com/questions/52813560/i-have-libsdl2-image-dev-installed-via-apt-get-but-cmake-cannot-find-it 
